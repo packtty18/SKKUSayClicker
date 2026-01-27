@@ -1,6 +1,7 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
-public class AudioFeedback : MonoBehaviour, IFeedback
+public class AudioFeedback : FeedbackBase
 {
     [SerializeField] private AudioSource _audio;
     [SerializeField] private AudioClip _clip;
@@ -9,7 +10,7 @@ public class AudioFeedback : MonoBehaviour, IFeedback
     {
         _audio = GetComponent<AudioSource>();
     }
-    public void Play(SClickInfo info)
+    public override void Play(SFeedbackData data)
     {
         if(_audio.isPlaying)
         {

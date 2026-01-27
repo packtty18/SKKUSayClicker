@@ -1,6 +1,8 @@
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 
 public interface IFeedback
 {
-    void Play(SClickInfo info);
+    Transform OwnerTransform { get; }
+    void Play(SFeedbackData data = default);
 }

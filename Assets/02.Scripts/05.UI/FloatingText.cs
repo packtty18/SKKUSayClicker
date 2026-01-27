@@ -1,11 +1,12 @@
 using DG.Tweening;
+using Lean.Pool;
+using Sirenix.Utilities;
 using TMPro;
 using UnityEngine;
 
-public class FloatingText : MonoBehaviour
+public class FloatingText : MonoBehaviour, IPlayFeedback, IFloaterText
 {
-    [Header("UI")]
-    [SerializeField] private TextMeshProUGUI _text;
+    [SerializeField] private TextMeshPro _text;
 
     [Header("Move")]
     [SerializeField] private float _moveY = 1f;
@@ -17,36 +18,51 @@ public class FloatingText : MonoBehaviour
 
     private Tween _tween;
 
-    private void Awake()
+    public void SetFloater(SFloaterTextContext context)
     {
-        _text = GetComponentInChildren<TextMeshProUGUI>();
+        SetType(context.Type);
+        SetText(context.Value);
     }
-
-    /// <summary>
-    /// UI 플로팅 재생
-    /// </summary>
-    public void Play(float value)
+    public void Play()
     {
-        Debug.Log($"[FloatingText] Play : {value}");
-
         _tween?.Kill();
-
-        _text.text = value.ToString();
         _text.alpha = 1f;
-
         _tween = DOTween.Sequence()
-            .Append(transform.DOLocalMoveY(_moveY,_duration)
+            .Append(transform.DOLocalMoveY(_moveY, _duration)
             .SetEase(_moveEase))
             .Join(_text.DOFade(0f, _duration).SetEase(_fadeEase))
             .OnComplete(() =>
             {
-                Destroy(gameObject);
+                LeanPool.Despawn(this);
+                //Destroy(gameObject);
                 //gameObject.SetActive(false);
             });
     }
 
-    private void OnDisable()
+    private void SetText(double value)
     {
-        _tween?.Kill();
+        _text.text += Utils.FormattedString(value);
+    }
+
+    private void SetType(EFloatTextType type)
+    {
+        switch (type)
+        {
+            case EFloatTextType.Printer: //아이콘 없은 텍스트 하얀색
+                _text.text = "<sprite=0>";
+                break;
+            case EFloatTextType.PrinterCritical:  //아이콘 없음 텍스트 빨강
+                _text.text = "<sprite=3>";
+                _text.color = Color.red;
+                break;
+            case EFloatTextType.Money:  //돈아이콘 , 텍스트 초록
+                _text.text = "<sprite=1>";
+                _text.color = Color.green;
+                break;
+            case EFloatTextType.Prestigy: //명성아이콘, 텍스트 노랑
+                _text.text = "<sprite=2>";
+                _text.color = Color.yellow;
+                break;
+        }
     }
 }

@@ -6,14 +6,12 @@ using UnityEngine;
 public class ClickManager : MonoBehaviour
 {
     [SerializeField] private LayerMask clickLayer;
-    [SerializeField] private ClickDataProvider clickDataProvider;
 
     private Camera _camera;
 
     private void Awake()
     {
         _camera = Camera.main;
-        clickDataProvider = GetComponent<ClickDataProvider>();
         Debug.Log("[ClickManager] Initialized");
     }
 
@@ -38,11 +36,10 @@ public class ClickManager : MonoBehaviour
 
         if (!hit.TryGetComponent<IClickable>(out var clickable))
         {
-            Debug.Log("[ClickManager] Target is not clickable");
+            Debug.Log($"[ClickManager] Target is not clickable {hit.name} ");
             return;
         }
 
-        SClickInfo clickInfo = clickDataProvider.CreateManualClick(worldPos);
-        clickable.OnClick(clickInfo);
+        clickable.OnClick();
     }
 }
