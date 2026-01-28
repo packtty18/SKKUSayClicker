@@ -46,12 +46,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 212250772320467481}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 956d633af4076fe4daa83f7521442007, type: 3}
+  m_Script: {fileID: 11500000, guid: 0afc1b390bff1a848b2ce1affd9ebfa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _text: {fileID: 193265025953391967}
   _moveY: 1
-  _duration: 2
+  _duration: 0.6
   _moveEase: 9
   _fadeEase: 6
 --- !u!1 &6126631756655751943

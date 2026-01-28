@@ -1,11 +1,18 @@
+
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-//인게임 자체의 게임 진행
-public class GameManager : LocalSingleton<GameManager>
+//전체 게임의 실행을 담당
+public class GameManager : GlobalSingleton<GameManager>
 {
     
 
     protected override void Init()
+    {
+    }
+
+    [Button]
+    public void OnApplicationQuit()
     {
     }
 }
