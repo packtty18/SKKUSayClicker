@@ -52,8 +52,8 @@ public class DataManager : LocalSingleton<DataManager>
         };
         _click = new Dictionary<EClickData, DataValue<float>>()
         {
-            { EClickData.ManualClickValue,          new DataValue<float>(1f) },
-            { EClickData.AutoClickValue,            new DataValue<float>(0.5f) },
+            { EClickData.ManualClickValue,          new DataValue<float>(10f) },
+            { EClickData.AutoClickValue,            new DataValue<float>(2f) },
 
             { EClickData.DefaultPrintAutoDamageTime,new DataValue<float>(5f) },
             { EClickData.DefaultAutoGetTime,        new DataValue<float>(5f) },
@@ -64,7 +64,7 @@ public class DataManager : LocalSingleton<DataManager>
         _printer = new Dictionary<EPrinterData, DataValue<float>>()
         {
             { EPrinterData.ValueByTime,        new DataValue<float>(1f) },
-            { EPrinterData.DefaultProductTime, new DataValue<float>(60f) },
+            { EPrinterData.DefaultProductTime, new DataValue<float>(100) },
         };
     }
 

@@ -50,7 +50,17 @@ namespace Borodar.RainbowHierarchy
             TREE_VIEW_ITEMS_METHOD = treeViewDataType.GetMethod("GetRows", INSTANCE_PUBLIC);
 
             var treeViewItem = assembly.GetType("UnityEditor.GameObjectTreeViewItem");
-            TREE_VIEW_OBJECT_PROPERTY = treeViewItem.GetProperty("objectPPTR", INSTANCE_PUBLIC);
+            // Unity 상위 버전 호환성: objectPPTR 속성이 중복 정의될 수 있으므로 더 구체적으로 찾기
+            PropertyInfo objectProperty = null;
+            foreach (var prop in treeViewItem.GetProperties(INSTANCE_PUBLIC))
+            {
+                if (prop.Name == "objectPPTR" && prop.PropertyType == typeof(UnityEngine.Object))
+                {
+                    objectProperty = prop;
+                    break;
+                }
+            }
+            TREE_VIEW_OBJECT_PROPERTY = objectProperty;
 
             // Callbacks
 

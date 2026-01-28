@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class ProgressUI : MonoBehaviour
 {
     [SerializeField] private PrinterController _printer;
-    [SerializeField] private Image _fillImage;
+    [SerializeField] private Slider _slider;
 
     private void Awake()
     {
@@ -21,6 +21,6 @@ public class ProgressUI : MonoBehaviour
     }
     private void OnChanged()
     {
-        _fillImage.fillAmount = _printer.GetRatio();
+        _slider.value = _printer.GetRatio();
     }
 }
