@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using System;
+using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -27,21 +28,20 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     [Title("stat")]
     private IPrinterStatProvider _stats;
-    private RuntimeValue<float> _progress;
-    public RuntimeValue<float> Progress => _progress;
+    private float _productTime;
+    private float _progress;
+    public float Progress => _progress;
+    public float ProductTime => _productTime;
 
     [Title("Observer")]
-    public event Action OnProductionCompleted;
+    public SafeEvent OnProgress = new();
+    public SafeEvent OnProductionCompleted = new();
 
     public void Init(IPrinterStatProvider stats)
     {
         _stats = stats;
-
-        _progress = new RuntimeValue<float>(
-            _stats.ProductTime,
-            0,
-            _stats.ValueByTime
-        );
+        _productTime = _stats.ProductTime;
+        _progress = _productTime;
 
         StartProduction();
     }
@@ -56,9 +56,9 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
         if (!_isProducing)
             return;
 
-        _progress.Regeneration(Time.deltaTime);
+        _progress += _stats.ValueByTime * Time.deltaTime;
 
-        if (_progress.IsFull())
+        if (_progress >= _productTime)
         {
             CompleteProduction();
             _productFeedback.PlayFeedbacks();
@@ -88,7 +88,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     private void StartProduction()
     {
-        _progress.Reset();
+        _progress = _productTime;
         _isProducing = true;
 
         Debug.Log("[Printer] Production Started");
@@ -96,7 +96,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     private void IncreaseProgress(float power)
     {
-        _progress.Increase(power);
+        _progress+= power;
     }
 
     private void CompleteProduction()

@@ -69,7 +69,6 @@ public class ClickManager : MonoBehaviour
 
         if (hit == null)
         {
-            Debug.Log("[ClickManager] Click Miss");
             PlayParticleEffect(normalClickParticle, worldPos);
             StartCoroutine(PlayClickCursorAnimation(clickCursor, normalCursor));
             return;

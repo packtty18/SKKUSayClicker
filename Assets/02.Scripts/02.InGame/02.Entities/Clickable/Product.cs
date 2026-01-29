@@ -14,8 +14,6 @@ public class Product : MonoBehaviour, IClickable, IPlayFeedback, IFeedbackOwner
     [Header("Caching")]
     public Transform OwnerTransform => transform;
 
-    private DataManager _data => DataManager.Instance;
-
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
@@ -42,7 +40,7 @@ public class Product : MonoBehaviour, IClickable, IPlayFeedback, IFeedbackOwner
 
     public void OnClick()
     {
-        float get = _data.GetDataValue(EIncomeData.Theme1Price) * _data.GetDataValue(EIncomeData.IncomeBonus);
+        float get = 100; // 나중에 데이터화하여 참조
         SFeedbackData data = new SFeedbackData()
         {
             TextType = EFloatTextType.Money,
@@ -50,8 +48,11 @@ public class Product : MonoBehaviour, IClickable, IPlayFeedback, IFeedbackOwner
         };
 
         _clickFeedback?.PlayFeedbacks(data);
-        Utils.DestroyAfterTime(1, gameObject);
-        _data.GetData(ECurrentcyData.Money).Increase(get);
+
+        //큐렌시 매니저를 생성하여 저장
+        CurrencyManager.Instance.Add(ECurrencyType.Money, get);
+
+        Utils.ObjectDestroy(gameObject); 
     }
 
 

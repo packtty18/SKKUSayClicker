@@ -7,24 +7,23 @@ public class ProgressUI : MonoBehaviour
     [SerializeField] private Printer _printer;
     [SerializeField] private Slider _slider;
 
-    private RuntimeValue<float> _value => _printer.Progress;
     private void Awake()
     {
         _printer = GetComponentInParent<Printer>();
     }
     private void Start()
     {
-        _value.Subscribe(OnChanged);
+        _printer.OnProgress.Subscribe(OnChanged);
     }
 
     private void OnDisable()
     {
-        _value.Unsubscribe(OnChanged);
+        _printer.OnProgress.Unsubscribe(OnChanged);
     }
 
 
-    private void OnChanged(float current)
+    private void OnChanged()
     {
-        _slider.value = _value.GetRatio();
+        _slider.value = _printer.Progress / _printer.ProductTime;
     }
 }

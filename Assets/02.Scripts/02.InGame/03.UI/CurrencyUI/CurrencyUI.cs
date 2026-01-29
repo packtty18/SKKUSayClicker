@@ -1,34 +1,39 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEngine.Rendering.DebugUI;
+
 
 public class CurrencyUI : MonoBehaviour
 {
-    private DataManager _data => DataManager.Instance;
-    [SerializeField] private DataValue<float> _target;
+    private CurrencyManager _data => CurrencyManager.Instance;
+    [SerializeField] private SCurrency _target;
     [SerializeField] private TextMeshProUGUI _text;
 
-    [SerializeField] private ECurrentcyData _targetData;
+    [SerializeField] private ECurrencyType _targetData;
 
     [SerializeField] private UnityEvent _onChangeEvent;
 
     private void Start()
     {
-        _target = _data.GetData(_targetData);
-        _target.Subscribe(OnChanged);
+        _target = _data.Get(_targetData);
+        //도메인에서는 이벤트가 있어서는 안되고 매니저를 통해야만 한다.
+        //CurrencyManager를 따로 만들어서 할것
+        CurrencyManager.OnDataChanged.Subscribe(OnChanged);
         ResetUI();
     }
 
     private void OnDestroy()
     {
-        _target.Unsubscribe(OnChanged);
+        CurrencyManager.OnDataChanged.Unsubscribe(OnChanged);
     }
 
-    private void OnChanged(float value)
+    private void OnChanged(ECurrencyType type)
     {
-        _text.text = Utils.FormattedString(value);
+        if(type != _targetData)
+        {
+            return;
+        }
+        _text.text = Utils.FormattedString(_target.Value);
 
         _onChangeEvent?.Invoke();
     }
