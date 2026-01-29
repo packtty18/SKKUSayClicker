@@ -4,19 +4,18 @@ public class Upgrade
 {
     public readonly UpgradeSpecData SpecData;
     public int Level { get; private set; }
-    public SCurrency Cost => SpecData.BaseCost + Mathf.Pow(SpecData.CostMultiplier, Level);   // 지수공식
+    public SCurrency Cost => SpecData.BaseCost + Mathf.Pow(SpecData.CostMultiplier, Level-1);   // 지수공식
     public float value => SpecData.BaseValue + Level * SpecData.ValueMultiplier;          //선형공식
     public bool IsMaxLevel => Level >= SpecData.MaxLevel;
 
 
-    public Upgrade(UpgradeSpecData specData)
+    public Upgrade(UpgradeSpecData specData, int level = 0)
     {
 
         if(specData.MaxLevel < 0)
         {
             throw new System.ArgumentException("최대 레벨이 0보다 작음");
         }
-
         if (specData.BaseCost < 0)
         {
             throw new System.ArgumentException("기본 코스트가 0보다 작음");
@@ -43,11 +42,17 @@ public class Upgrade
         }
 
         SpecData = specData;
+        Level = level;
+    }
+
+    public bool CanLevelUp()
+    {
+        return !IsMaxLevel;
     }
 
     public bool TryLevelUp()
     {
-        if(!IsMaxLevel)
+        if(IsMaxLevel)
         {
             return false;
         }
@@ -55,4 +60,6 @@ public class Upgrade
         Level++;
         return true;
     }
+
+
 }

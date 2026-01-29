@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CurrencyRepository : GameDataRepository<ECurrencyType, SCurrency>
+public class CurrencyRepository : StructDataRepository<ECurrencyType, SCurrency>
 {
     public void InitializeFromConfig(CurrencyConfigSO config)
     {

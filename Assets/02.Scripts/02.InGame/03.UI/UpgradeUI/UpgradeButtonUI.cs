@@ -1,9 +1,10 @@
+using JetBrains.Annotations;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UpgradeButton : MonoBehaviour, IFeedbackOwner
+public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
 {
     [SerializeField, ReadOnly] private Button _button;
 
@@ -26,15 +27,15 @@ public class UpgradeButton : MonoBehaviour, IFeedbackOwner
 
     private void OnEnable()
     {
-        UpgradeManager.OnDataChanged += Refresh;
+        UpgradeManager.Instance.OnDataChanged.Subscribe( Refresh);
     }
 
     private void OnDisable()
     {
-        UpgradeManager.OnDataChanged -= Refresh;
+        UpgradeManager.Instance.OnDataChanged.Unsubscribe(Refresh);
     }
 
-    public void SetContent(EUpgradeType type, Upgrade upgrade)
+    public void SetContent(EUpgradeType type ,Upgrade upgrade)
     {
         _type = type;
         _upgrade = upgrade;
@@ -42,6 +43,7 @@ public class UpgradeButton : MonoBehaviour, IFeedbackOwner
         _iconImage.sprite = upgrade.SpecData.Icon;
         _nameText.text = upgrade.SpecData.Name;
         _descriptionText.text = upgrade.SpecData.Description;
+        _levelText.text = upgrade.Level.ToString();
 
         Refresh();
     }
@@ -51,14 +53,44 @@ public class UpgradeButton : MonoBehaviour, IFeedbackOwner
         if (_upgrade == null)
             return;
 
-        _levelText.text = $"Lv {_upgrade.Level}";
-        _costText.text = _upgrade.IsMaxLevel ? "MAX" : _upgrade.Cost.ToString();
+        _levelText.text = $"{_upgrade.Level}";
 
+        if(_upgrade.IsMaxLevel)
+        {
+            _costText.text = "MAX";
+        }
+        else
+        {
+            string icon = "";
+            switch (_upgrade.SpecData.CostType)
+            {
+                case ECurrencyType.Money:
+                    icon = "<sprite=1>";
+                    break;
+                case ECurrencyType.Prestigy:
+                    icon = "<sprite=2>";
+                    break;
+                default:
+                    break;
+            }
+
+            _costText.text = icon + _upgrade.Cost.ToString();
+        }
+       
         _button.interactable = !_upgrade.IsMaxLevel;
     }
 
     public void OnClick()
     {
         //아직
+        if (UpgradeManager.Instance.TryLevelUp(_type))
+        {
+
+            Refresh();
+        }
+        else
+        {
+
+        }
     }
 }

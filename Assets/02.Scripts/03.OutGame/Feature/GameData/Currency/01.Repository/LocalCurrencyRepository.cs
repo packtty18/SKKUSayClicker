@@ -30,4 +30,13 @@ public class LocalCurrencyRepository : ICurrencyRepository
 
         return data;
     }
+
+    public void DeleteSave()
+    {
+        for (int i = 0; i < (int)ECurrencyType.Count; i++)
+        {
+            var type = (ECurrencyType)i;
+            PlayerPrefs.SetString(type.ToString(), "0");
+        }
+    }
 }

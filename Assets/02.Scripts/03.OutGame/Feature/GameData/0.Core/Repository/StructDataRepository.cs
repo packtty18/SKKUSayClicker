@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameDataRepository<TKey, TValue> : IGameDataRepository<TKey, TValue>
+public class StructDataRepository<TKey, TValue> : IGameDataRepository<TKey, TValue>
     where TKey : Enum
     where TValue : struct
 {

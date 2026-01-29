@@ -7,6 +7,7 @@ public class UpgradeSpecData
 {
     public EUpgradeType Type;
     public int MaxLevel;
+    public ECurrencyType CostType;
     public float BaseCost;
     public float BaseValue;
     public float CostMultiplier;
