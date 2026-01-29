@@ -28,8 +28,8 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     [Title("stat")]
     private IPrinterStatProvider _stats;
-    private float _productTime;
-    private float _progress;
+    [SerializeField] private float _productTime;
+    [SerializeField] private float _progress;
     public float Progress => _progress;
     public float ProductTime => _productTime;
 
@@ -41,7 +41,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
     {
         _stats = stats;
         _productTime = _stats.ProductTime;
-        _progress = _productTime;
+        _progress = 0;
 
         StartProduction();
     }
@@ -56,7 +56,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
         if (!_isProducing)
             return;
 
-        _progress += _stats.ValueByTime * Time.deltaTime;
+        IncreaseProgress(_stats.ValueByTime * Time.deltaTime);
 
         if (_progress >= _productTime)
         {
@@ -88,7 +88,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     private void StartProduction()
     {
-        _progress = _productTime;
+        _progress = 0;
         _isProducing = true;
 
         Debug.Log("[Printer] Production Started");
@@ -97,6 +97,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
     private void IncreaseProgress(float power)
     {
         _progress+= power;
+        OnProgress.Invoke();
     }
 
     private void CompleteProduction()

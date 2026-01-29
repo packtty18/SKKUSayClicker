@@ -49,7 +49,6 @@ public class Product : MonoBehaviour, IClickable, IPlayFeedback, IFeedbackOwner
 
         _clickFeedback?.PlayFeedbacks(data);
 
-        //큐렌시 매니저를 생성하여 저장
         CurrencyManager.Instance.Add(ECurrencyType.Money, get);
 
         Utils.ObjectDestroy(gameObject); 

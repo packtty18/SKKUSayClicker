@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Datas:
   - Type: 0
-    MaxLevel: 0
+    MaxLevel: 5
     BaseCost: 0
     BaseValue: 0
     CostMultiplier: 0
@@ -23,40 +23,45 @@ MonoBehaviour:
     Description: "\uCE74\uB4DC\uB97C \uC9C1\uC811 \uC81C\uC791\uD558\uB294 \uC791\uC5C5\uC774
       \uB2A5\uC219\uD574\uC84C\uB2E4.\n\uD504\uB9B0\uD130\uB97C \uD074\uB9AD\uD560\uC2DC
       \uC99D\uAC00\uD558\uB294 \uC9C4\uD589\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
-    Icon: {fileID: 0}
+    Icon: {fileID: 184926547, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 1
-    MaxLevel: 0
+    MaxLevel: 5
     BaseCost: 0
     BaseValue: 0
     CostMultiplier: 0
     ValueMultiplier: 0
-    Name: 
-    Description: 
-    Icon: {fileID: 0}
+    Name: "\uB7ED\uD0A4 \uD578\uB4DC"
+    Description: "\uD06C\uB9AC\uD2F0\uCEEC \uBC1C\uC0DD \uD655\uB960\uC774 \uC99D\uAC00\uD55C\uB2E4.\n\uD06C\uB9AC\uD2F0\uCEEC
+      \uD074\uB9AD \uBC1C\uC0DD\uD655\uB960\uC774 \uC99D\uAC00\uD55C\uB2E4."
+    Icon: {fileID: 496806899, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 2
-    MaxLevel: 0
+    MaxLevel: 5
     BaseCost: 0
     BaseValue: 0
     CostMultiplier: 0
     ValueMultiplier: 0
-    Name: 
-    Description: 
-    Icon: {fileID: 0}
+    Name: "\uBD80\uD488 \uAD50\uCCB4"
+    Description: "\uD504\uB9B0\uD130\uC758 \uBD80\uD488\uC744 \uB354 \uC88B\uC740
+      \uBD80\uD488\uC73C\uB85C \uAD50\uCCB4\uD55C\uB2E4.\n\uD504\uB9B0\uD130\uC758
+      \uC790\uB3D9 \uC9C4\uD589 \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+    Icon: {fileID: 124857761, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 3
-    MaxLevel: 0
+    MaxLevel: 5
     BaseCost: 0
     BaseValue: 0
     CostMultiplier: 0
     ValueMultiplier: 0
-    Name: 
-    Description: 
-    Icon: {fileID: 0}
+    Name: "AI \uC5C5\uADF8\uB808\uC774\uB4DC"
+    Description: "AI\uC131\uB2A5\uC744 \uB192\uC778\uB2E4\n\uD504\uB9B0\uD130 \uC790\uB3D9
+      \uD074\uB9AD \uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+    Icon: {fileID: 1138137278, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 4
-    MaxLevel: 0
+    MaxLevel: 5
     BaseCost: 0
     BaseValue: 0
     CostMultiplier: 0
     ValueMultiplier: 0
-    Name: 
-    Description: 
-    Icon: {fileID: 0}
+    Name: "\uC2DC\uC124 \uD655\uC7A5"
+    Description: "\uB2E4\uC74C \uD655\uC7A5\uD329 \uCE74\uB4DC\uB97C \uAC1C\uBD09\uD55C\uB2E4.\n\uD504\uB9B0\uD130\uC758
+      \uC778\uC1C4 \uC9C4\uD589\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
+    Icon: {fileID: -1595002427, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
