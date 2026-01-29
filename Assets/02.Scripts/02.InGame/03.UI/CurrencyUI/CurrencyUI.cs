@@ -29,13 +29,13 @@ public class CurrencyUI : MonoBehaviour
         {
             return;
         }
-        _text.text = Utils.FormattedString(_target.Value);
 
+        _text.text = Utils.FormattedString(_data.Get(_targetData).Value);
         _onChangeEvent?.Invoke();
     }
 
     private void ResetUI()
     {
-        _text.text = Utils.FormattedString(_target.Value);
+        _text.text = Utils.FormattedString(_data.Get(_targetData).Value);
     }
 }
