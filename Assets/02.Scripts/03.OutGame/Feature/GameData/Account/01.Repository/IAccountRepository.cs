@@ -2,10 +2,8 @@ using UnityEngine;
 
 public interface IAccountRepository : IRepository
 {
-    bool Exists(string id);
-    string LoadPasswordHash(string id);
-    void Save(string id, string passwordHash);
-
-    void DeleteSave(string id);
-
+    void Save(Account account);
+    Account Load(Account account);
+    bool Exists(string email);
+    Account Get(string email);
 }

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
+public class UpgradeManager : GloblaManager<UpgradeManager>, ISaveManager
 {
     public SafeEvent OnDataChanged = new();
 

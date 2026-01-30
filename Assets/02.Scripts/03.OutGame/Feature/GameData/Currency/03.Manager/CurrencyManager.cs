@@ -1,6 +1,6 @@
 using Sirenix.OdinInspector;
 
-public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
+public class CurrencyManager : GloblaManager<CurrencyManager>, ISaveManager
 {
 
     public static SafeEvent<ECurrencyType> OnDataChanged = new();

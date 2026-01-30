@@ -2,61 +2,38 @@ using UnityEngine;
 
 //저장과 불러오기 만을 담당(검증 없음)
 public class LocalAccountRepository : IAccountRepository
-{
-    private const string PasswordSuffix = "_PW";
-
-    public bool Exists(string id)
+{    
+    public void Save(Account account)
     {
-        bool exists = PlayerPrefs.HasKey(GetPasswordKey(id));
-        Debug.Log($"[AccountRepository] Exists({id}) = {exists}");
-        return exists;
-    }
-
-    //ID를 통한 패스워드 해쉬 가져오기
-    public string LoadPasswordHash(string id)
-    {
-        if (!Exists(id))
-        {
-            Debug.LogWarning($"[AccountRepository] Load failed. ID not found: {id}");
-            return string.Empty;
-        }
-
-        string hash = PlayerPrefs.GetString(GetPasswordKey(id), string.Empty);
-        Debug.Log($"[AccountRepository] Password hash loaded for ID: {id}");
-        return hash;
-    }
-
-    //해당 ID에 해쉬로 저장
-    public void Save(string id, string passwordHash)
-    {
-        PlayerPrefs.SetString(GetPasswordKey(id), passwordHash);
+        PlayerPrefs.SetString(account.Email, account.Password);
         PlayerPrefs.Save();
-
-        Debug.Log($"[AccountRepository] Account saved. ID: {id}");
     }
 
-    //수정이 필요
-    public void DeleteSave(string id)
+    public Account Load(Account account)
     {
-        if (!Exists(id))
-        {
-            Debug.LogWarning($"[AccountRepository] Delete failed. ID not found: {id}");
-            return;
-        }
+        if (!Exists(account.Email))
+            return null;
 
-        PlayerPrefs.DeleteKey(GetPasswordKey(id));
-        PlayerPrefs.Save();
-
-        Debug.Log($"[AccountRepository] Account deleted. ID: {id}");
+        string password = PlayerPrefs.GetString(account.Email);
+        return new Account(account.Email, password);
     }
 
-    private string GetPasswordKey(string id)
+    public bool Exists(string email)
     {
-        return $"{id}{PasswordSuffix}";
+        return PlayerPrefs.HasKey(email);
+    }
+
+    public Account Get(string email)
+    {
+        if (!Exists(email))
+            return null;
+
+        string password = PlayerPrefs.GetString(email);
+        return new Account(email, password);
     }
 
     public void DeleteAllSave()
     {
-        throw new System.NotImplementedException();
+        PlayerPrefs.DeleteAll();
     }
 }

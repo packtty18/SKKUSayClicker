@@ -18,7 +18,7 @@ public class LoginUI : MonoBehaviour
     [SerializeField] private Button _confirmButton;
     [SerializeField] private Button _cancelButton;
 
-    [SerializeField] private TMP_InputField _idField;
+    [SerializeField] private TMP_InputField _emailField;
     [SerializeField] private TMP_InputField _passwordField;
     [SerializeField] private TMP_InputField _confirmField;
     [SerializeField] private TextMeshProUGUI _messageText;
@@ -35,66 +35,46 @@ public class LoginUI : MonoBehaviour
         _loginButton.onClick.AddListener(OnLoginClicked);
         _confirmButton.onClick.AddListener(OnRegisterClicked);
         _cancelButton.onClick.AddListener(() => SwitchMode(SceneMode.Login));
+
+        _emailField.onValueChanged.AddListener(OnEmailTextChanged);
     }
 
 
     private void OnLoginClicked()
     {
-        var result = _account.Login(_idField.text, _passwordField.text);
-        HandleLoginResult(result);
+        string email = _emailField.text;
+        string password = _passwordField.text;
+        SAuthResult result =  AccountManager.Instance.TryLogin(email, password);
+        ShowMessage(result.ErrorMessage);
     }
 
     private void OnRegisterClicked()
     {
-        var result = _account.Register(
-            _idField.text,
-            _passwordField.text,
-            _confirmField.text);
-
-        HandleRegisterResult(result);
+        string email = _emailField.text;
+        string password = _passwordField.text;
+        string confirmPassword = _confirmField.text;
+        SAuthResult result = AccountManager.Instance.TryRegister(email, password, confirmPassword);
+        ShowMessage(result.ErrorMessage);
     }
 
-    private void HandleLoginResult(ELoginResult result)
+    public void OnEmailTextChanged(string value)
     {
-        switch (result)
+        EmailValidator validator = new EmailValidator(AccountManager.Instance.Repository);
+        ValidationResult result = validator.Validate(value);
+
+        ShowMessage(result.FirstError);
+
+        if(_mode == SceneMode.Login)
         {
-            case ELoginResult.Success:
-                SceneManager.LoadScene(1);
-                break;
-            case ELoginResult.InvalidIdFormat:
-                ShowMessage("아이디 형식이 올바르지 않습니다.");
-                break;
-            case ELoginResult.AccountNotFound:
-                ShowMessage("존재하지 않는 계정입니다.");
-                break;
-            case ELoginResult.InvalidPassword:
-                ShowMessage("비밀번호가 올바르지 않습니다.");
-                break;
+            _loginButton.interactable = result.IsValid;
+        }
+        else
+        {
+            _registerButton.interactable = result.IsValid;
         }
     }
 
-    private void HandleRegisterResult(ERegisterResult result)
-    {
-        switch (result)
-        {
-            case ERegisterResult.Success:
-                SwitchMode(SceneMode.Login);
-                ShowMessage("계정 생성이 완료되었습니다.");
-                break;
-            case ERegisterResult.InvalidIdFormat:
-                ShowMessage("아이디 형식이 올바르지 않습니다.");
-                break;
-            case ERegisterResult.DuplicatedId:
-                ShowMessage("이미 존재하는 아이디입니다.");
-                break;
-            case ERegisterResult.InvalidPassword:
-                ShowMessage("비밀번호가 적절하지 않습니다.");
-                break;
-            case ERegisterResult.PasswordMismatch:
-                ShowMessage("비밀번호가 서로 다릅니다.");
-                break;
-        }
-    }
+
     private void ShowMessage(string message)
     {
         _messageText.text = message;
@@ -114,7 +94,7 @@ public class LoginUI : MonoBehaviour
         _confirmButton.gameObject.SetActive(_mode == SceneMode.Register);
         _cancelButton.gameObject.SetActive(_mode == SceneMode.Register);
 
-        _idField.text = PlayerPrefs.GetString("LastId", "");
+        _emailField.text = PlayerPrefs.GetString("LastId", "");
         _passwordField.text = "";
         _confirmField.text = "";
         _messageText.text = "";

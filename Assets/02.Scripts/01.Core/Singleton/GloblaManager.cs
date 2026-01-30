@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class LocalSingleton<T> : MonoBehaviour
+public abstract class GloblaManager<T> : MonoBehaviour
     where T : MonoBehaviour
 {
     public static T Instance { get; private set; }
