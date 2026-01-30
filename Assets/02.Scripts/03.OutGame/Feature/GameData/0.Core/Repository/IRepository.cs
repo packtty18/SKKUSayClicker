@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface IRepository
 {
-    public void DeleteSave();
+    public void DeleteAllSave();
 }

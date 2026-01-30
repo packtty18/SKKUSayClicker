@@ -31,7 +31,7 @@ public class LocalCurrencyRepository : ICurrencyRepository
         return data;
     }
 
-    public void DeleteSave()
+    public void DeleteAllSave()
     {
         for (int i = 0; i < (int)ECurrencyType.Count; i++)
         {

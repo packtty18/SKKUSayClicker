@@ -14,57 +14,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Datas:
   - Type: 0
-    MaxLevel: 50
+    MaxLevel: 100
     CostType: 0
-    BaseCost: 10
-    BaseValue: 1
-    CostMultiplier: 1.25
-    ValueMultiplier: 0.25
+    BaseCost: 100
+    BaseValue: 0
+    CostMultiplier: 1.5
+    ValueMultiplier: 1
     Name: "\uD074\uB9AD \uD30C\uC6CC"
     Description: "\uCE74\uB4DC\uB97C \uC9C1\uC811 \uC81C\uC791\uD558\uB294 \uC791\uC5C5\uC774
       \uB2A5\uC219\uD574\uC84C\uB2E4.\n\uD504\uB9B0\uD130\uB97C \uD074\uB9AD\uD560\uC2DC
       \uC99D\uAC00\uD558\uB294 \uC9C4\uD589\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
     Icon: {fileID: 184926547, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 1
-    MaxLevel: 50
+    MaxLevel: 100
     CostType: 0
-    BaseCost: 50
-    BaseValue: 0.05
-    CostMultiplier: 1.4
+    BaseCost: 200
+    BaseValue: 0
+    CostMultiplier: 2
     ValueMultiplier: 0.005
     Name: "\uB7ED\uD0A4 \uD578\uB4DC"
     Description: "\uD06C\uB9AC\uD2F0\uCEEC \uBC1C\uC0DD \uD655\uB960\uC774 \uC99D\uAC00\uD55C\uB2E4.\n\uD06C\uB9AC\uD2F0\uCEEC
       \uD074\uB9AD \uBC1C\uC0DD\uD655\uB960\uC774 \uC99D\uAC00\uD55C\uB2E4."
     Icon: {fileID: 496806899, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 2
-    MaxLevel: 50
+    MaxLevel: 100
     CostType: 0
-    BaseCost: 75
-    BaseValue: 1.5
-    CostMultiplier: 1.35
+    BaseCost: 300
+    BaseValue: 0
+    CostMultiplier: 2
     ValueMultiplier: 0.05
     Name: "\uD669\uAE08\uC758 \uC190"
     Description: "\uD06C\uB9AC\uD2F0\uCEEC \uBC1C\uC0DD\uC2DC \uC99D\uAC00\uB7C9\uC774
       \uC99D\uAC00\uD55C\uB2E4."
     Icon: {fileID: 124857761, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 3
-    MaxLevel: 50
+    MaxLevel: 100
     CostType: 0
-    BaseCost: 100
+    BaseCost: 500
     BaseValue: 0
-    CostMultiplier: 1.3
-    ValueMultiplier: 1
+    CostMultiplier: 7
+    ValueMultiplier: 0.005
     Name: "\uBD80\uD488\uAD50\uCCB4"
     Description: "\uD504\uB9B0\uD130\uC758 \uC131\uB2A5\uC774 \uC99D\uAC00\uD55C\uB2E4.\n\uC0DD\uC0B0\uC5D0
       \uAC78\uB9AC\uB294 \uC2DC\uAC04\uC774 \uAC10\uC18C\uD55C\uB2E4."
     Icon: {fileID: 1138137278, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 4
-    MaxLevel: 50
+    MaxLevel: 50100
     CostType: 0
-    BaseCost: 120
+    BaseCost: 1000
     BaseValue: 1
-    CostMultiplier: 1.32
-    ValueMultiplier: 0.3
+    CostMultiplier: 8
+    ValueMultiplier: 0.1
     Name: AI
     Description: "\uC790\uB3D9 \uC0DD\uC0B0 \uC99D\uAC00\uB7C9\uC774 \uC99D\uAC00\uD55C\uB2E4."
     Icon: {fileID: -1595002427, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}

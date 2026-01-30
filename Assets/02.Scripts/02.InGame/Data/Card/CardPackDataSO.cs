@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class CardPackDataSO : MonoBehaviour
 {
-    public ECardPackTheme Theme;
+    public EProductType Theme;
     public int CardCount;
 }

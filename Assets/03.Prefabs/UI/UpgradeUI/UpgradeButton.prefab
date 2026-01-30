@@ -2821,7 +2821,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _button: {fileID: 0}
-  _backgroundTransform: {fileID: 5744017973044179304}
   _iconImage: {fileID: 8224118793150670215}
   _nameText: {fileID: 4762858296340316740}
   _descriptionText: {fileID: 5625269057270920814}

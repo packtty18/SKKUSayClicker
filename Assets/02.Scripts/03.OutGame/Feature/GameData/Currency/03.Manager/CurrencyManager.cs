@@ -76,6 +76,6 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
     [Button("세이브 삭제")]
     public void ResetSave()
     {
-        _repository.DeleteSave();
+        _repository.DeleteAllSave();
     }
 }

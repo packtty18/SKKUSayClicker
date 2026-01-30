@@ -28,7 +28,7 @@ public class LocalUpgradeRepository : IUpgradeRepository
 
         return data;
     }
-    public void DeleteSave()
+    public void DeleteAllSave()
     {
         for (int i = 0; i < (int)EUpgradeType.Count; i++)
         {
