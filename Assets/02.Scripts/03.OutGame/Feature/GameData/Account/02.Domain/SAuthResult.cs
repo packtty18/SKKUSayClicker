@@ -3,14 +3,14 @@ using UnityEngine;
 
 public readonly struct SAuthResult
 {
-    public readonly bool Success;
-    public readonly string ErrorMessage;
+    public readonly bool IsSuccess;
+    public readonly string Message;
     public readonly Account Account;
 
     public SAuthResult(bool v, string message = "", Account value = null)
     {
-        Success = v;
-        ErrorMessage = message;
+        IsSuccess = v;
+        Message = message;
         Account = value;
     }
 }
