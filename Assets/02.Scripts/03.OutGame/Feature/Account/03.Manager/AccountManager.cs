@@ -5,7 +5,7 @@ using UnityEngine;
 // 로그인 씬에서만 사용
 // Account 도메인 관리 (CRUD + Save) : 생성, 조회, 수정, 삭제, 저장
 // 외부와의 소통 창구
-public class AccountManager : LocalSingleton<AccountManager>
+public class AccountManager : GlobalSingleton<AccountManager>
 {
     [SerializeField] private Account _currentAccount;
 
