@@ -109,16 +109,9 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
     [GUIColor(1, 0.3f, 0.3f)]
     private void ClearAll()
     {
-        if (UnityEditor.EditorUtility.DisplayDialog(
-            "경고", 
-            "정말로 모든 PlayerPrefs 데이터를 삭제하시겠습니까?", 
-            "삭제", 
-            "취소"))
-        {
-            PlayerPrefsRepository.ResetAll();
-            RefreshData();
-            Debug.LogWarning("[PlayerPrefsDebugger] All PlayerPrefs cleared!");
-        }
+        PlayerPrefsRepository.ResetAll();
+        RefreshData();
+        Debug.LogWarning("[PlayerPrefsDebugger] All PlayerPrefs cleared!");
     }
 
     [Button("Delete Specific Account", ButtonSizes.Medium)]
