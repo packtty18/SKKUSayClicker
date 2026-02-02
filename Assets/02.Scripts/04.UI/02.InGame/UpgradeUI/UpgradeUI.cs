@@ -23,18 +23,15 @@ public class UpgradeUI : SerializedMonoBehaviour
 
     private void InstantButtons()
     {
-        IReadOnlyDictionary< EUpgradeType, Upgrade> db = UpgradeManager.Instance.Upgrades;
+        List<IReadOnlyUpgrade> db = UpgradeManager.Instance.Upgrades;
 
-        foreach (var pair in db)
+        foreach (var upgrade in db)
         {
-            EUpgradeType type = pair.Key;
-            Upgrade upgrade = pair.Value;
-
             UpgradeButtonUI button =
                 Instantiate(_upgradeButtonPrefab, _buttonRoot)
                 .GetComponent<UpgradeButtonUI>();
 
-            button.SetContent(type, upgrade);
+            button.SetContent(upgrade);
         }
     }
 

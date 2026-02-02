@@ -15,7 +15,7 @@ public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
     [SerializeField] private TextMeshProUGUI _costText;
 
     private EUpgradeType _type;
-    private Upgrade _upgrade;
+    private IReadOnlyUpgrade _upgrade;
 
     public Transform OwnerTransform => transform;
 
@@ -39,14 +39,13 @@ public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
         UpgradeManager.Instance.OnDataChanged.Unsubscribe(Refresh);
     }
 
-    public void SetContent(EUpgradeType type ,Upgrade upgrade)
+    public void SetContent(IReadOnlyUpgrade upgrade)
     {
-        _type = type;
         _upgrade = upgrade;
-
-        _iconImage.sprite = upgrade.SpecData.Icon;
-        _nameText.text = upgrade.SpecData.Name;
-        _descriptionText.text = upgrade.SpecData.Description;
+        _type = upgrade.Spec.Type;
+        _iconImage.sprite = upgrade.Spec.Icon;
+        _nameText.text = upgrade.Spec.Name;
+        _descriptionText.text = upgrade.Spec.Description;
         _levelText.text = upgrade.Level.ToString();
 
         Refresh();
@@ -66,7 +65,7 @@ public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
         else
         {
             string icon = "";
-            switch (_upgrade.SpecData.CostType)
+            switch (_upgrade.Spec.CostType)
             {
                 case ECurrencyType.Money:
                     icon = "<sprite=1>";
@@ -86,6 +85,10 @@ public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
 
     public void OnClick()
     {
+        //여기서는 이게 되면 안됨
+        //_upgrade.TryLevelUp();
+
+
         //아직
         if (UpgradeManager.Instance.TryLevelUp(_type))
         {

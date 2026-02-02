@@ -1,6 +1,5 @@
 using UnityEngine;
-
-public class Upgrade
+public class Upgrade : IReadOnlyUpgrade
 {
     public readonly UpgradeSpecData SpecData;
     public int Level { get; private set; }
@@ -8,6 +7,7 @@ public class Upgrade
     public float value => SpecData.BaseValue + Level * SpecData.ValueMultiplier;          //선형공식
     public bool IsMaxLevel => Level >= SpecData.MaxLevel;
 
+    public UpgradeSpecData Spec => SpecData;
 
     public Upgrade(UpgradeSpecData specData, int level = 0)
     {

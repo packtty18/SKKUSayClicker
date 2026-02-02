@@ -2,7 +2,7 @@
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
-using TMPro;
+using System.Linq;
 using UnityEngine;
 
 public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
@@ -11,9 +11,12 @@ public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
 
     [SerializeField] private UpgradeSpecTableSO _specTable;
 
+    //매니저 내부에서는 Upgrade 조작 가능
     private readonly Dictionary<EUpgradeType, Upgrade> _upgrades = new();
-    public IReadOnlyDictionary<EUpgradeType, Upgrade> Upgrades => _upgrades;
+    //private List<Upgrade> Upgrades => _upgrades.Values.ToList<Upgrade>();
 
+    //외부에서는 함부로 Upgrade를 수정하지 못하도록 IReadonly로 주기
+    public List<IReadOnlyUpgrade> Upgrades => _upgrades.Values.ToList<IReadOnlyUpgrade>();
 
     private IUpgradeRepository _repository;
     protected override void Init()
