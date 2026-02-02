@@ -1,0 +1,24 @@
+using Sirenix.OdinInspector;
+using System;
+
+//계정에 대한 도메인
+[Serializable]
+public class Account
+{
+    [ShowInInspector, ReadOnly] public readonly string Email;
+    [ShowInInspector, ReadOnly] public readonly string Password;
+    [ShowInInspector, ReadOnly] public readonly bool IsSetted = false;
+    public Account(string email, string password)
+    {
+        EmailSpecification emailSpec = new EmailSpecification();
+        PasswordSpecification passwordSpec = new PasswordSpecification();
+
+        if (!emailSpec.IsSatisfiedBy(email)) throw new ArgumentException(emailSpec.ErrorMessage);
+        if (!passwordSpec.IsSatisfiedBy(password)) throw new ArgumentException(passwordSpec.ErrorMessage);
+
+        Email = email;
+        Password = password;
+        IsSetted = true;
+    }
+
+}

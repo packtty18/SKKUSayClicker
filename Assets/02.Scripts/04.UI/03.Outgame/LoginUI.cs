@@ -7,10 +7,16 @@ public class LoginUI : MonoBehaviour
 {
     private AccountManager _account => AccountManager.Instance;
 
-    private enum SceneMode { Login, Register }
+    private enum SceneMode { Login, Register, Ready }
     private SceneMode _mode = SceneMode.Login;
 
-    [Header("UI References")]
+    [Header("ReadyUI References")]
+    [SerializeField] private GameObject _OnLogInUIs;
+    [SerializeField] private Button _gameStartButton;
+    [SerializeField] private Button _logOutButton;
+
+    [Header("LogInUI References")]
+    [SerializeField] private GameObject _OnLogOutUIs;
     [SerializeField] private GameObject _passwordConfirmObject;
     [SerializeField] private Button _registerButton;
     [SerializeField] private Button _loginButton;
@@ -28,12 +34,27 @@ public class LoginUI : MonoBehaviour
 
     private void Start()
     {
+        if(_account.IsLogin)
+        {
+            SwitchMode(SceneMode.Ready);
+        }
+        else
+        {
+            SwitchMode(SceneMode.Login);
+        }
+
         RefreshUI();
         AddButtonEvents();
     }
 
     private void AddButtonEvents()
     {
+        _gameStartButton.onClick.AddListener(OnGameStartClicked);
+
+        _logOutButton.onClick.AddListener(() => SwitchMode(SceneMode.Login));
+        _logOutButton.onClick.AddListener(OnLogOutClicked);
+        
+
         _registerButton.onClick.AddListener(() => SwitchMode(SceneMode.Register));
         _loginButton.onClick.AddListener(OnLoginClicked);
         _confirmButton.onClick.AddListener(OnRegisterClicked);
@@ -43,6 +64,17 @@ public class LoginUI : MonoBehaviour
         _emailField.onValueChanged.AddListener(OnEmailTextChanged);
         _passwordField.onValueChanged.AddListener(OnPasswordTextChanged);
         _confirmField.onValueChanged.AddListener(OnPasswordConfirmTextChanged);
+    }
+
+    private void OnGameStartClicked()
+    {
+        MySceneManager.Instance.ChangeScene(ESceneType.Game);
+    }
+
+    private void OnLogOutClicked()
+    {
+        _account.Logout();
+        RefreshUI();
     }
 
     private void OnLoginClicked()
@@ -55,7 +87,7 @@ public class LoginUI : MonoBehaviour
         if (result.IsSuccess)
         {
             ShowMessage("로그인 성공!", Color.green);
-            // TODO: 다음 씬으로 이동
+            SwitchMode(SceneMode.Ready);
         }
         else
         {
@@ -215,7 +247,19 @@ public class LoginUI : MonoBehaviour
     private void SwitchMode(SceneMode mode)
     {
         _mode = mode;
-        RefreshUI();
+
+        if(mode == SceneMode.Ready)
+        {
+            _OnLogInUIs.SetActive(true);
+            _OnLogOutUIs.SetActive(false);
+        }
+        else
+        {
+            _OnLogInUIs.SetActive(false);
+            _OnLogOutUIs.SetActive(true);
+            RefreshUI();
+        }
+           
     }
 
     private void RefreshUI()
@@ -228,7 +272,15 @@ public class LoginUI : MonoBehaviour
         _cancelButton.gameObject.SetActive(_mode == SceneMode.Register);
 
         // 필드 초기화
-        _emailField.text = PlayerPrefs.GetString("LastAccountEmail", "");
+        if (_mode == SceneMode.Login)
+        {
+            _emailField.text = AccountManager.Instance.GetLastEmail();
+        }
+        else
+        {
+            _emailField.text = "";
+        }
+
         _passwordField.text = "";
         _confirmField.text = "";
 
