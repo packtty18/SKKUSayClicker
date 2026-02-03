@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+//미완성
 public class CardUI : MonoBehaviour
 {
     [SerializeField] EProductType _theme;

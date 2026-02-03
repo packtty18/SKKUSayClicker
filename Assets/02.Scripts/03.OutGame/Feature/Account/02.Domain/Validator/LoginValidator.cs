@@ -11,7 +11,7 @@ public class LoginValidator
     public ValidationResult ValidateEmail(string email)
     {
         var validator = new SpecificationValidator<string>()
-            .Add(new EmailSpecification())
+            .Add(new EmailSpecification()) 
             .Add(new AccountExistsSpecification(_repository));
 
         return validator.ValidateFast(email);
