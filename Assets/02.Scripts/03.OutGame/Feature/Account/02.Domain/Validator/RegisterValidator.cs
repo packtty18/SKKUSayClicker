@@ -1,5 +1,6 @@
-//회원가입 행위에 대한 검증
+using Cysharp.Threading.Tasks;
 
+// 회원가입 행위에 대한 검증
 public class RegisterValidator
 {
     private readonly IAccountRepository _repository;
@@ -9,10 +10,10 @@ public class RegisterValidator
         _repository = repository;
     }
 
-    public ValidationResult ValidateEmail(string email)
+    public async UniTask<ValidationResult> ValidateEmailAsync(string email)
     {
         var emailValidator = new EmailValidator(_repository);
-        return emailValidator.Validate(email);
+        return await emailValidator.ValidateAsync(email);
     }
 
     public ValidationResult ValidatePassword(string password)
@@ -26,8 +27,8 @@ public class RegisterValidator
         var matchSpec = new PasswordMatchSpecification();
         if (!matchSpec.IsSatisfiedBy((password, passwordConfirm)))
         {
-            return new ValidationResult(false, new System.Collections.Generic.List<string> { matchSpec.ErrorMessage });
+            return ValidationResult.Fail(matchSpec.ErrorMessage);
         }
-        return new ValidationResult(true, new System.Collections.Generic.List<string>());
+        return ValidationResult.Success();
     }
 }

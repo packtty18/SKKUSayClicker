@@ -1,17 +1,18 @@
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 
-public class LocalCurrencyRepository : ICurrencyRepository
+public class PlayerPrefsCurrencyRepository : ICurrencyRepository
 {
     private const string DOMAIN = "Currency";
     private readonly string _userId;
-    public LocalCurrencyRepository(string userId)
+    public PlayerPrefsCurrencyRepository(string userId)
     {
         _userId = userId;
     }
 
-    public void Save(SCurrencySaveData saveData)
+    public async UniTask Save(SCurrencySaveData saveData)
     {
         // 어떻게든 Save한다.
         for (int i = 0; i < (int)ECurrencyType.Count; i++)
@@ -21,7 +22,7 @@ public class LocalCurrencyRepository : ICurrencyRepository
         }
     }
 
-    public SCurrencySaveData Load()
+    public async UniTask<SCurrencySaveData> Load()
     {
         SCurrencySaveData data = SCurrencySaveData.Default;
 
@@ -37,12 +38,5 @@ public class LocalCurrencyRepository : ICurrencyRepository
         }
 
         return data;
-    }
-
-    [Button("해당 User의 모든 데이터 삭제")]
-    public void DeleteAll()
-    {
-        PlayerPrefsRepository.DeleteDomain(_userId, DOMAIN);
-        Debug.Log($"{_userId}의 모든 {DOMAIN}데이터 제거");
     }
 }

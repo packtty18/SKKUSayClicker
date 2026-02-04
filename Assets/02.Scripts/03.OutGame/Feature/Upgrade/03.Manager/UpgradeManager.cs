@@ -21,7 +21,7 @@ public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
     private IUpgradeRepository _repository;
     protected override void Init()
     {
-        _repository = new LocalUpgradeRepository(AccountManager.Instance.Email);
+        _repository = new PlayerPrefsUpgradeRepository(AccountManager.Instance.Email);
         int[] levels = _repository.Load().Level;
 
         foreach (var specData in _specTable.Datas)
@@ -81,11 +81,5 @@ public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
             saveData.Level[(int)type] = level;
         }
         _repository.Save(saveData);
-    }
-
-    [Button("데이터 모두 제거")]
-    public void ResetSave()
-    {
-        _repository.DeleteAll();
     }
 }

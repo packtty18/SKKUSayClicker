@@ -1,11 +1,11 @@
 using MoreMountains.Tools;
 using UnityEngine;
 
-public class LocalUpgradeRepository : IUpgradeRepository
+public class PlayerPrefsUpgradeRepository : IUpgradeRepository
 {
     private const string DOMAIN = "Upgrade"; 
     private readonly string _userId;
-    public LocalUpgradeRepository(string userId)
+    public PlayerPrefsUpgradeRepository(string userId)
     {
         _userId = userId;
     }

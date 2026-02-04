@@ -1,10 +1,10 @@
-using MoreMountains.Tools;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
-// Repository-level validation only
-public class LocalAccountRepository : IAccountRepository
+public class PlayerPrefsAccountRepository : IAccountRepository
 {
     private const string DOMAIN = "Account";
     private const string PASSWORD = "Password";
@@ -12,20 +12,21 @@ public class LocalAccountRepository : IAccountRepository
     private const string SALT = "Salt";
 
 
-    public bool Exists(string email)
+    public async UniTask<bool> Exists(string email)
     {
         bool exists = PlayerPrefs.HasKey(
             PlayerPrefsKeyBuilder.GameData(email, DOMAIN, PASSWORD)
         );
-
-        return exists;
+        return await new UniTask<bool>(exists);
     }
 
 
-    public SAuthResult LogIn(string email, string password)
+    public async UniTask<SAccountResult> LogIn(string email, string password)
     {
-        if (!Exists(email))
-            return new SAuthResult(false, "Account not found", null);
+        var existResult = await Exists(email);
+
+        if (!existResult)
+            return await new UniTask<SAccountResult>(new SAccountResult(false, "Account not found", null));
 
         string savedHashedPassword =
             PlayerPrefsRepository.GetString(email, DOMAIN, PASSWORD);
@@ -33,19 +34,19 @@ public class LocalAccountRepository : IAccountRepository
         string inputHashedPassword = GetHashedPassword(password);
 
         if (!string.Equals(savedHashedPassword, inputHashedPassword))
-            return new SAuthResult(false, "Password mismatch", null);
-
-        SaveLastEmail(email);
+            return await new UniTask<SAccountResult>(new SAccountResult(false, "Password mismatch", null));
 
         Debug.Log($"[AccountRepo] Login success: {email}");
-        return new SAuthResult(true, "Login success", new Account(email, password));
+        return await new UniTask<SAccountResult>(new SAccountResult(true, "Login success", new Account(email, password)));
     }
 
 
-    public SAuthResult Register(string email, string password)
+    public async UniTask<SAccountResult> Register(string email, string password)
     {
-        if (Exists(email))
-            return new SAuthResult(false, "Account already exists", null);
+        var existResult = await Exists(email);
+
+        if (!existResult)
+            return new SAccountResult(false, "Account already exists", null);
 
         try
         {
@@ -58,14 +59,12 @@ public class LocalAccountRepository : IAccountRepository
                 hashedPassword
             );
 
-            SaveLastEmail(email);
-
             Debug.Log($"[AccountRepo] Register success: {email}");
-            return new SAuthResult(true, "Register success", new Account(email, password));
+            return new SAccountResult(true, "Register success", new Account(email, password));
         }
         catch (Exception e)
         {
-            return new SAuthResult(false, e.Message, null);
+            return new SAccountResult(false, e.Message, null);
         }
     }
 
@@ -83,17 +82,6 @@ public class LocalAccountRepository : IAccountRepository
         PlayerPrefsRepository.ResetAll();
         Debug.LogWarning("[AccountRepo] DeleteAllSave executed");
     }
-
-    public string GetLastEmail()
-    {
-        return PlayerPrefsRepository.GetString("Global", DOMAIN, LAST_ACCOUNT, "");
-    }
-
-    private void SaveLastEmail(string email)
-    {
-        PlayerPrefsRepository.SetString("Global", DOMAIN, LAST_ACCOUNT, email);
-    }
-
 
     private string GetHashedPassword(string target)
     {

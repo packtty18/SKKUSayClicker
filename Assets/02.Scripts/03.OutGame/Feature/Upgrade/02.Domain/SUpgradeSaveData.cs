@@ -1,3 +1,5 @@
+using Firebase.Firestore;
+using System;
 using UnityEngine;
 
 public struct SUpgradeSaveData
@@ -9,4 +11,12 @@ public struct SUpgradeSaveData
     {
         Level = new int[(int)EUpgradeType.Count]
     };
+}
+
+[Serializable]
+[FirestoreData]
+public class FirebaseUpgradeSaveData
+{
+    [FirestoreProperty]
+    public int[] Level { get; set; }
 }

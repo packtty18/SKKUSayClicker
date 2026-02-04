@@ -1,4 +1,7 @@
-public class AccountExistsSpecification : ISpecification<string>
+using Cysharp.Threading.Tasks;
+
+// 비동기 Repository 체크를 위한 Specification
+public class AccountExistsSpecification
 {
     private readonly IAccountRepository _repository;
     private string _errorMessage;
@@ -9,9 +12,10 @@ public class AccountExistsSpecification : ISpecification<string>
         _repository = repository;
     }
 
-    public bool IsSatisfiedBy(string email)
+    public async UniTask<bool> IsSatisfiedByAsync(string email)
     {
-        if (!_repository.Exists(email))
+        bool exists = await _repository.Exists(email);
+        if (!exists)
         {
             _errorMessage = "존재하지 않는 계정";
             return false;

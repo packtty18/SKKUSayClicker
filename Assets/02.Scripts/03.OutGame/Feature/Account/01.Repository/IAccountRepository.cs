@@ -1,10 +1,9 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public interface IAccountRepository : IRepository
+public interface IAccountRepository
 {
-    bool Exists(string email);
-    SAuthResult LogIn(string email, string password);
-    SAuthResult Register(string email, string password);
-
-    string GetLastEmail();
+    UniTask<bool> Exists(string email);
+    UniTask<SAccountResult> LogIn(string email, string password);
+    UniTask<SAccountResult> Register(string email, string password);
 }

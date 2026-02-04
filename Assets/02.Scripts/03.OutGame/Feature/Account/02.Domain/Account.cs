@@ -1,3 +1,4 @@
+using Firebase.Firestore;
 using Sirenix.OdinInspector;
 using System;
 
@@ -6,7 +7,8 @@ using System;
 public class Account
 {
     [ShowInInspector, ReadOnly] public readonly string Email;
-    [ShowInInspector, ReadOnly] public readonly string Password;
+    //보안성에 따라 비밀번호는 검증만 시행하고 클라이언트 환경에서 저장하지 않음
+    //[ShowInInspector, ReadOnly] public readonly string Password;
     [ShowInInspector, ReadOnly] public readonly bool IsSetted = false;
     public Account(string email, string password)
     {
@@ -17,8 +19,20 @@ public class Account
         if (!passwordSpec.IsSatisfiedBy(password)) throw new ArgumentException(passwordSpec.ErrorMessage);
 
         Email = email;
-        Password = password;
+        //Password = password;
         IsSetted = true;
     }
+}
 
+//파이어베이스 전용 어카운트 세이브 데이터
+[Serializable]
+[FirestoreData]
+public class FirebaseAccountSaveData
+{
+    [FirestoreProperty]
+    public string Email { get; set; }
+    public FirebaseAccountSaveData(string email)
+    {
+        Email = email;
+    }
 }

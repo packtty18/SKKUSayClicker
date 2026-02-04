@@ -1,8 +1,8 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public interface IUpgradeRepository : IRepository
+public interface IUpgradeRepository
 {
-    public void Save(SUpgradeSaveData upgrade);
-    public SUpgradeSaveData Load();
-    
+    void Save(SUpgradeSaveData upgrade);
+    SUpgradeSaveData Load();
 }

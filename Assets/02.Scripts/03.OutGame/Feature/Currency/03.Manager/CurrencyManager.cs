@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 
 public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
@@ -9,12 +10,17 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
 
     protected override void Init()
     {
-        _repository = new LocalCurrencyRepository(AccountManager.Instance.Email);
+        _repository = new PlayerPrefsCurrencyRepository(AccountManager.Instance.Email);
     }
 
     private void Start()
     {
-        float[] currencyValues = _repository.Load().Currencies;
+        Load().Forget();
+    }
+    private async UniTask Load()
+    {
+        var result  = await _repository.Load();
+        float[] currencyValues = result.Currencies;
         for (int i = 0; i < _currencies.Length; i++)
         {
             _currencies[i] = currencyValues[i];
@@ -69,11 +75,5 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
             saveData.Currencies[i] = (float)_currencies[i];
         }
         _repository.Save(saveData);
-    }
-
-    [Button("데이터 모두 제거")]
-    public void ResetSave()
-    {
-        _repository.DeleteAll();
     }
 }

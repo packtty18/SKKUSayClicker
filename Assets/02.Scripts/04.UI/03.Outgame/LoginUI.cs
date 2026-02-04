@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
@@ -77,12 +78,12 @@ public class LoginUI : MonoBehaviour
         RefreshUI();
     }
 
-    private void OnLoginClicked()
+    private async void OnLoginClicked()
     {
         string email = _emailField.text;
         string password = _passwordField.text;
 
-        SAuthResult result = _account.TryLogin(email, password);
+        SAccountResult result = await _account.TryLoginAsync(email, password);
         
         if (result.IsSuccess)
         {
@@ -95,14 +96,14 @@ public class LoginUI : MonoBehaviour
         }
     }
 
-    private void OnRegisterClicked()
+    private async void OnRegisterClicked()
     {
         string email = _emailField.text;
         string password = _passwordField.text;
         string confirmPassword = _confirmField.text;
 
         // TryRegisterWithAllErrors를 사용하여 모든 에러를 한 번에 표시
-        SAuthResult result = _account.TryRegister(email, password, confirmPassword);
+        SAccountResult result = await _account.TryRegisterAsync(email, password, confirmPassword);
         
         if (result.IsSuccess)
         {
@@ -115,7 +116,7 @@ public class LoginUI : MonoBehaviour
         }
     }
 
-    // 이메일 필드 검증
+    // 이메일 필드 검증 (실시간 - 동기 검증만)
     private void OnEmailTextChanged(string value)
     {
         if (_mode == SceneMode.Login)
@@ -135,9 +136,9 @@ public class LoginUI : MonoBehaviour
         }
         else
         {
-            // 회원가입 모드: 전체 이메일 검증 (중복 포함)
+            // 회원가입 모드: 이메일 형식 검증만 (중복 체크는 제출 시 수행)
             var emailValidator = new EmailValidator(_account.Repository);
-            var result = emailValidator.Validate(value);
+            var result = emailValidator.Validate(value); // 동기 검증 (중복 체크 제외)
             _isEmailValid = result.IsValid;
             
             if (!_isEmailValid)
@@ -272,15 +273,7 @@ public class LoginUI : MonoBehaviour
         _cancelButton.gameObject.SetActive(_mode == SceneMode.Register);
 
         // 필드 초기화
-        if (_mode == SceneMode.Login)
-        {
-            _emailField.text = AccountManager.Instance.GetLastEmail();
-        }
-        else
-        {
-            _emailField.text = "";
-        }
-
+        _emailField.text = "";
         _passwordField.text = "";
         _confirmField.text = "";
 

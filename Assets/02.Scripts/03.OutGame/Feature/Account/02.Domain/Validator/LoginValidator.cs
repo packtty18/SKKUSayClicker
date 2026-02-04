@@ -1,4 +1,6 @@
-//로그인 행위에 대한 검증
+using Cysharp.Threading.Tasks;
+
+// 로그인 행위에 대한 검증
 public class LoginValidator
 {
     private readonly IAccountRepository _repository;
@@ -8,13 +10,24 @@ public class LoginValidator
         _repository = repository;
     }
 
-    public ValidationResult ValidateEmail(string email)
+    public async UniTask<ValidationResult> ValidateEmailAsync(string email)
     {
-        var validator = new SpecificationValidator<string>()
-            .Add(new EmailSpecification()) 
-            .Add(new AccountExistsSpecification(_repository));
+        // 1. 이메일 형식 검증 (동기)
+        var emailSpec = new EmailSpecification();
+        if (!emailSpec.IsSatisfiedBy(email))
+        {
+            return ValidationResult.Fail(emailSpec.ErrorMessage);
+        }
 
-        return validator.ValidateFast(email);
+        // 2. 계정 존재 여부 검증 (비동기)
+        var existsSpec = new AccountExistsSpecification(_repository);
+        bool exists = await existsSpec.IsSatisfiedByAsync(email);
+        if (!exists)
+        {
+            return ValidationResult.Fail(existsSpec.ErrorMessage);
+        }
+
+        return ValidationResult.Success();
     }
 
     public ValidationResult ValidatePassword(string password)

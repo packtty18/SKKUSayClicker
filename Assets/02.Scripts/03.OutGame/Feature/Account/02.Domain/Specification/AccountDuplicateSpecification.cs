@@ -1,6 +1,8 @@
+using Cysharp.Threading.Tasks;
 
-//해당 계정이 이미 리포지토리에 존재하는지 확인
-public class AccountDuplicateSpecification : ISpecification<string>
+// 비동기 Repository 체크를 위한 Specification
+// 해당 계정이 이미 리포지토리에 존재하는지 확인
+public class AccountDuplicateSpecification
 {
     private readonly IAccountRepository _repository;
     private string _errorMessage;
@@ -11,9 +13,10 @@ public class AccountDuplicateSpecification : ISpecification<string>
         _repository = repository;
     }
 
-    public bool IsSatisfiedBy(string email)
+    public async UniTask<bool> IsSatisfiedByAsync(string email)
     {
-        if (_repository.Exists(email))
+        bool exists = await _repository.Exists(email);
+        if (exists)
         {
             _errorMessage = "중복된 계정";
             return false;

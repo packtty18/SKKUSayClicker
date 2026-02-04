@@ -31,7 +31,7 @@ public class FirebaseTutorial : MonoBehaviour
     private async UniTaskVoid StartAsync()
     {
         SetText("Init");
-        await InitAsync();
+        await FirebaseService.InitializeAsync();
 
         SetText("LogOut");
         LogOut();
@@ -46,29 +46,6 @@ public class FirebaseTutorial : MonoBehaviour
     private void SetText(string text)
     {
         _progressText.text = text;
-    }
-
-    private async UniTask InitAsync()
-    {
-        try
-        {
-            var status = await FirebaseApp
-                .CheckAndFixDependenciesAsync()
-                .AsUniTask();
-
-            if (status != DependencyStatus.Available)
-                throw new Exception($"[Firebase] 의존성이 올바르지 않음 : {status}");
-
-            _app = FirebaseApp.DefaultInstance;
-            _auth = FirebaseAuth.DefaultInstance;
-            _db = FirebaseFirestore.DefaultInstance;
-
-            Debug.Log("[Firebase] 초기화 완료");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[Firebase] 초기화 성공 : {e}");
-        }
     }
 
     [Button]
@@ -109,6 +86,10 @@ public class FirebaseTutorial : MonoBehaviour
 
             Debug.Log($"[Firebase Auth] 로그인 성공 : {result.User.Email}");
         }
+        catch (FirebaseException e)
+        {
+            Debug.LogError($"[Firebase Auth] 파이어베이스에 의한 실패 : {e}");
+        }
         catch (Exception e)
         {
             Debug.LogError($"[Firebase Auth] 로그인 실패 : {e}");
@@ -142,9 +123,13 @@ public class FirebaseTutorial : MonoBehaviour
 
             Debug.Log("[Firebase DB] 세이브 성공");
         }
+        catch(FirebaseException e)
+        {
+            Debug.LogError($"[Firebase DB] 파이어베이스에 의한 세이브 실패 : {e}");
+        }
         catch (Exception e)
         {
-            Debug.LogError($"[Firebase DB] 세이브 실패 : {e}");
+            Debug.LogError($"[Firebase DB] 기타 세이브 실패 : {e}");
         }
     }
 
