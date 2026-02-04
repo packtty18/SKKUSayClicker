@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class UpgradeManager : GlobalSingleton<UpgradeManager>, ISaveManager
+public class UpgradeManager : GlobalSingleton<UpgradeManager>
 {
     public SafeEvent OnDataChanged = new();
 

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 
-public class CurrencyManager : GlobalSingleton<CurrencyManager>, ISaveManager
+public class CurrencyManager : GlobalSingleton<CurrencyManager>
 {
     public static SafeEvent<ECurrencyType> OnDataChanged = new();
 
