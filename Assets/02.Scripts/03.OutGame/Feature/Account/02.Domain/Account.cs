@@ -23,18 +23,3 @@ public class Account
         IsSetted = true;
     }
 }
-
-//파이어베이스 전용 어카운트 세이브 데이터
-[Serializable]
-[FirestoreData]
-public class FirebaseAccountSaveData
-{
-    [FirestoreProperty]
-    public string Email { get; set; }
-    public FirebaseAccountSaveData()
-    { }
-    public FirebaseAccountSaveData(string email)
-    {
-        Email = email;
-    }
-}

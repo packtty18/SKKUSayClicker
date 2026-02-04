@@ -29,7 +29,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
             return await new UniTask<SAccountResult>(new SAccountResult(false, "Account not found", null));
 
         string savedHashedPassword =
-            PlayerPrefsRepository.GetString(email, DOMAIN, PASSWORD);
+            UserScopedPlayerPrefs.GetString(email, DOMAIN, PASSWORD);
 
         string inputHashedPassword = GetHashedPassword(password);
 
@@ -37,7 +37,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
             return await new UniTask<SAccountResult>(new SAccountResult(false, "Password mismatch", null));
 
         Debug.Log($"[AccountRepo] Login success: {email}");
-        return await new UniTask<SAccountResult>(new SAccountResult(true, "Login success", new Account(email, password)));
+        return await new UniTask<SAccountResult>(new SAccountResult(true, "Login success", email));
     }
 
 
@@ -52,7 +52,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
         {
             string hashedPassword = GetHashedPassword(password);
 
-            PlayerPrefsRepository.SetString(
+            UserScopedPlayerPrefs.SetString(
                 email,
                 DOMAIN,
                 PASSWORD,
@@ -60,27 +60,12 @@ public class PlayerPrefsAccountRepository : IAccountRepository
             );
 
             Debug.Log($"[AccountRepo] Register success: {email}");
-            return new SAccountResult(true, "Register success", new Account(email, password));
+            return new SAccountResult(true, "Register success", email);
         }
         catch (Exception e)
         {
             return new SAccountResult(false, e.Message, null);
         }
-    }
-
-    //특정 계정 삭제
-    public void Delete(string key)
-    {
-        PlayerPrefsRepository.DeleteUser(key);
-        Debug.Log($"[AccountRepo] Account deleted: {key}");
-    }
-
-    
-    //계정 및 모든 데이터 삭제
-    public void DeleteAll()
-    {
-        PlayerPrefsRepository.ResetAll();
-        Debug.LogWarning("[AccountRepo] DeleteAllSave executed");
     }
 
     private string GetHashedPassword(string target)

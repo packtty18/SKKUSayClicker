@@ -11,21 +11,3 @@ public struct SCurrencySaveData
         Currencies = new float[(int)ECurrencyType.Count]
     };
 }
-
-
-[Serializable]
-[FirestoreData]
-public class FirebaseCurrencySaveData
-{
-    [FirestoreProperty]
-    public float[] Currencies { get; private set; }
-
-    public FirebaseCurrencySaveData() 
-    { 
-    
-    }
-    public FirebaseCurrencySaveData(SCurrencySaveData data)
-    {
-        Currencies = data.Currencies;
-    }
-}

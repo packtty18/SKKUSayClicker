@@ -19,7 +19,7 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
         for (int i = 0; i < (int)ECurrencyType.Count; i++)
         {
             var type = (ECurrencyType)i;
-            PlayerPrefsRepository.SetFloat(_userId, DOMAIN, type.ToString(), saveData.Currencies[i]);//.ToString("G17")); //
+            UserScopedPlayerPrefs.SetFloat(_userId, DOMAIN, type.ToString(), saveData.Currencies[i]);//.ToString("G17")); //
         }
     }
 
@@ -34,7 +34,7 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
             if (PlayerPrefs.HasKey($"{_userId}_{type.ToString()}"))
             {
                 data.Currencies[i] =
-                    PlayerPrefsRepository.GetFloat(_userId,DOMAIN,type.ToString(), 0);
+                    UserScopedPlayerPrefs.GetFloat(_userId,DOMAIN,type.ToString(), 0);
             }
         }
 

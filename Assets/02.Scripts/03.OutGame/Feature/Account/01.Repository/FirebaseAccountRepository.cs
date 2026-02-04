@@ -27,8 +27,8 @@ public class FirebaseAccountRepository : IAccountRepository
     {
         try
         {
-            Firebase.Auth.AuthResult result = await _auth.SignInWithEmailAndPasswordAsync(email, password).AsUniTask();
-            return new SAccountResult(true);
+            AuthResult result = await _auth.SignInWithEmailAndPasswordAsync(email, password).AsUniTask();
+            return new SAccountResult(true,"", email);
         }
         catch (Exception e)
         {
@@ -63,7 +63,7 @@ public class FirebaseAccountRepository : IAccountRepository
             );
             await batch.CommitAsync();
 
-            return new SAccountResult(true, "성공");
+            return new SAccountResult(true, "성공", email);
         }
         catch (Exception e)
         {

@@ -5,12 +5,12 @@ public readonly struct SAccountResult
 {
     public readonly bool IsSuccess;
     public readonly string Message;
-    public readonly Account Account;
+    public readonly string Email;
 
-    public SAccountResult(bool success, string message = "", Account value = null)
+    public SAccountResult(bool success, string message = "", string email = "")
     {
         IsSuccess = success;
         Message = message;
-        Account = value;
+        Email = email;
     }
 }

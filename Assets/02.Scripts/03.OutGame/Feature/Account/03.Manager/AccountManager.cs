@@ -8,10 +8,10 @@ using UnityEngine;
 // 외부와의 소통 창구
 public class AccountManager : GlobalSingleton<AccountManager>
 {
-    [SerializeField] private Account _currentAccount;
+    [SerializeField,ReadOnly] private string _currentEmail;
 
-    public bool IsLogin => _currentAccount.IsSetted;
-    public string Email => _currentAccount?.Email ?? string.Empty;
+    public bool IsLogin => !string.IsNullOrEmpty(_currentEmail);
+    public string Email => _currentEmail;
 
     private IAccountRepository _repository;
     public IAccountRepository Repository => _repository;
@@ -47,7 +47,7 @@ public class AccountManager : GlobalSingleton<AccountManager>
 
         // 2. 리포지토리에서의 검증 (해당 로그인의 정보가 리포지토리에 존재하는지 여부 등)
         SAccountResult repositoryLogin = await _repository.LogIn(email, password);
-        _currentAccount = repositoryLogin.Account;
+        _currentEmail = repositoryLogin.Email;
         return repositoryLogin;
     }
 
@@ -79,6 +79,6 @@ public class AccountManager : GlobalSingleton<AccountManager>
 
     public void Logout()
     {
-        _currentAccount = null;
+        _currentEmail = string.Empty;
     }
 }

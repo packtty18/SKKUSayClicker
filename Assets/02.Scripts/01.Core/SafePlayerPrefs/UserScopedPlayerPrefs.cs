@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 //플레이어 Pref 관리
-public static class PlayerPrefsRepository
+public static class UserScopedPlayerPrefs
 {
     private static string BuildKey(string userId, string domain, string dataType)
         => PlayerPrefsKeyBuilder.GameData(userId, domain, dataType);
@@ -11,21 +11,21 @@ public static class PlayerPrefsRepository
     //아이디를 생성했을때 등록
     private static void Register(string userId, string key)
     {
-        PlayerPrefsIndex.RegisterUser(userId);
-        PlayerPrefsIndex.RegisterKey(userId, key);
+        PlayerPrefsIndexManagement.RegisterUser(userId);
+        PlayerPrefsIndexManagement.RegisterKey(userId, key);
     }
 
     //해당 유저를 삭제
     public static void DeleteUser(string userId)
     {
-        PlayerPrefsIndex.ClearUser(userId);
+        PlayerPrefsIndexManagement.ClearUser(userId);
     }
 
     //해당 계정의 해당 도메인을 모두 삭제
     public static void DeleteDomain(string userId, string domain)
     {
         //01. 모든 키 가져오기
-        var keys = PlayerPrefsIndex.GetKeys(userId);
+        var keys = PlayerPrefsIndexManagement.GetKeys(userId);
         var removedKeys = new List<string>();
 
         foreach (var key in keys)
@@ -42,7 +42,7 @@ public static class PlayerPrefsRepository
         }
 
         //해당 유저정보에게서 해당 키 제거
-        PlayerPrefsIndex.Unregister(userId, removedKeys);
+        PlayerPrefsIndexManagement.Unregister(userId, removedKeys);
     }
 
 
@@ -103,14 +103,14 @@ public static class PlayerPrefsRepository
         Debug.Log("[Prefs] --- Dumping All PlayerPrefs Data ---");
 
         // 1. 모든 유저 ID 가져오기
-        var allUserIds = PlayerPrefsIndex.GetAllUserIds();
+        var allUserIds = PlayerPrefsIndexManagement.GetAllUserIds();
 
         foreach (var userId in allUserIds)
         {
             Debug.Log($"[Prefs] User: {userId}");
 
             // 2. 해당 유저의 모든 키 가져오기
-            var keys = PlayerPrefsIndex.GetKeys(userId);
+            var keys = PlayerPrefsIndexManagement.GetKeys(userId);
 
             foreach (var key in keys)
             {

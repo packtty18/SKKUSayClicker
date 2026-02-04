@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //유저별 키 관리 & 유저 목록 관리
-public static class PlayerPrefsIndex
+public static class PlayerPrefsIndexManagement
 {
     //새로운 유저 등록, 글로벌 유저 인덱스 관리
     public static void RegisterUser(string userId)

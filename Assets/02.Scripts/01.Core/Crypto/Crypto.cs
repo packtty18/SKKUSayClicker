@@ -4,9 +4,7 @@ using System.Text;
 
 public static class Crypto
 {
-    /// <summary>
-    /// 비밀번호를 SHA256으로 해시
-    /// </summary>
+    // 비밀번호를 SHA256으로 해시
     public static string HashPassword(string plainText, string salt = "")
     {
         if (string.IsNullOrEmpty(plainText))
@@ -20,14 +18,5 @@ public static class Crypto
             byte[] hash = sha256.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
         }
-    }
-
-    /// <summary>
-    /// 비밀번호 검증
-    /// </summary>
-    public static bool VerifyPassword(string plainText, string hashedPassword, string salt = "")
-    {
-        string inputHash = HashPassword(plainText, salt);
-        return inputHash == hashedPassword;
     }
 }

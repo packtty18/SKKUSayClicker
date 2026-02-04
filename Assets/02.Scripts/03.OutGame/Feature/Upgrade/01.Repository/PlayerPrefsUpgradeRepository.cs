@@ -15,7 +15,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
         for (int i = 0; i < (int)EUpgradeType.Count; i++)
         {
             var type = (EUpgradeType)i;
-            PlayerPrefsRepository.SetInt(
+            UserScopedPlayerPrefs.SetInt(
                 _userId,
                 DOMAIN,
                 type.ToString(),
@@ -35,7 +35,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
             if (PlayerPrefs.HasKey($"{_userId}_{DOMAIN}_{type.ToString()}"))
             {
                 data.Level[i] =
-                    PlayerPrefsRepository.GetInt(_userId,DOMAIN, type.ToString(), 0);
+                    UserScopedPlayerPrefs.GetInt(_userId,DOMAIN, type.ToString(), 0);
             }
         }
 

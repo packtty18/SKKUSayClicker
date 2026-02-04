@@ -12,20 +12,3 @@ public struct SUpgradeSaveData
         Level = new int[(int)EUpgradeType.Count]
     };
 }
-
-[Serializable]
-[FirestoreData]
-public class FirebaseUpgradeSaveData
-{
-    [FirestoreProperty]
-    public int[] Level { get; set; }
-
-    public FirebaseUpgradeSaveData()
-    {
-
-    }
-    public FirebaseUpgradeSaveData(SUpgradeSaveData data)
-    {
-        Level = data.Level;
-    }
-}

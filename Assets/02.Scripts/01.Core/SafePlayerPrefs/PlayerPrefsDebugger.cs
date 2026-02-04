@@ -19,7 +19,7 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
         _accountDataList.Clear();
 
         // 모든 유저 가져오기
-        var allUserIds = PlayerPrefsIndex.GetAllUserIds();
+        var allUserIds = PlayerPrefsIndexManagement.GetAllUserIds();
 
         foreach (var userId in allUserIds)
         {
@@ -29,11 +29,10 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
                 CurrencyData = new Dictionary<string, string>(),
                 UpgradeData = new Dictionary<string, string>(),
                 AccountData = new Dictionary<string, string>(),
-                OtherData = new Dictionary<string, string>()
             };
 
             // 유저의 모든 키 가져오기
-            var keys = PlayerPrefsIndex.GetKeys(userId);
+            var keys = PlayerPrefsIndexManagement.GetKeys(userId);
 
             foreach (var key in keys)
             {
@@ -62,9 +61,6 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
                             break;
                         case "Account":
                             accountData.AccountData[dataType] = value;
-                            break;
-                        default:
-                            accountData.OtherData[$"{domain}_{dataType}"] = value;
                             break;
                     }
                 }
@@ -109,7 +105,7 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
     [GUIColor(1, 0.3f, 0.3f)]
     private void ClearAll()
     {
-        PlayerPrefsRepository.ResetAll();
+        UserScopedPlayerPrefs.ResetAll();
         RefreshData();
         Debug.LogWarning("[PlayerPrefsDebugger] All PlayerPrefs cleared!");
     }
@@ -123,7 +119,7 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
             return;
         }
 
-        PlayerPrefsRepository.DeleteUser(userId);
+        UserScopedPlayerPrefs.DeleteUser(userId);
         RefreshData();
         Debug.Log($"[PlayerPrefsDebugger] Account deleted: {userId}");
     }
@@ -145,9 +141,5 @@ public class PlayerPrefsDebugger : GlobalSingleton<PlayerPrefsDebugger>
         [ShowInInspector, ReadOnly, FoldoutGroup("Account Data")]
         [DictionaryDrawerSettings(DisplayMode = DictionaryDisplayOptions.OneLine)]
         public Dictionary<string, string> AccountData;
-
-        [ShowInInspector, ReadOnly, FoldoutGroup("Other Data")]
-        [DictionaryDrawerSettings(DisplayMode = DictionaryDisplayOptions.OneLine)]
-        public Dictionary<string, string> OtherData;
     }
 }
