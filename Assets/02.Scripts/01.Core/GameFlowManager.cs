@@ -6,6 +6,11 @@ public class GameFlowManager : LocalSingleton<GameFlowManager>
     {
     }
 
+    public void SetTimeScale(float value)
+    {
+        Time.timeScale = value;
+    }
+
     public void GotoTitleScene()
     {
         MySceneManager.Instance.ChangeScene(ESceneType.Title);

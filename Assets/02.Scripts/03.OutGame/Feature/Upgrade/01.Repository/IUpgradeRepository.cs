@@ -3,6 +3,6 @@ using UnityEngine;
 
 public interface IUpgradeRepository
 {
-    void Save(SUpgradeSaveData upgrade);
-    SUpgradeSaveData Load();
+    UniTaskVoid Save(SUpgradeSaveData upgrade);
+    UniTask<SUpgradeSaveData> Load();
 }

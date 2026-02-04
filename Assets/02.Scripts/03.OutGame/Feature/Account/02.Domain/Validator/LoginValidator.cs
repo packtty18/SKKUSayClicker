@@ -20,12 +20,12 @@ public class LoginValidator
         }
 
         // 2. 계정 존재 여부 검증 (비동기)
-        var existsSpec = new AccountExistsSpecification(_repository);
-        bool exists = await existsSpec.IsSatisfiedByAsync(email);
-        if (!exists)
-        {
-            return ValidationResult.Fail(existsSpec.ErrorMessage);
-        }
+        //var existsSpec = new AccountExistsSpecification(_repository);
+        //bool exists = await existsSpec.IsSatisfiedByAsync(email);
+        //if (!exists)
+        //{
+        //    return ValidationResult.Fail(existsSpec.ErrorMessage);
+        //}
 
         return ValidationResult.Success();
     }

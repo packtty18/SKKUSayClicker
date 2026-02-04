@@ -3,7 +3,6 @@ using UnityEngine;
 
 public interface IAccountRepository
 {
-    UniTask<bool> Exists(string email);
     UniTask<SAccountResult> LogIn(string email, string password);
     UniTask<SAccountResult> Register(string email, string password);
 }

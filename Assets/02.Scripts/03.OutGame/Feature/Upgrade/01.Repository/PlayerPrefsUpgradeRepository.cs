@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using MoreMountains.Tools;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
     {
         _userId = userId;
     }
-    public void Save(SUpgradeSaveData upgrade)
+    public async UniTaskVoid Save(SUpgradeSaveData upgrade)
     {
         for (int i = 0; i < (int)EUpgradeType.Count; i++)
         {
@@ -23,7 +24,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
         }
     }
 
-    public SUpgradeSaveData Load()
+    public async UniTask<SUpgradeSaveData> Load()
     {
         SUpgradeSaveData data = SUpgradeSaveData.Default;
 
@@ -40,11 +41,4 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
 
         return data;
     }
-
-    public void DeleteAll()
-    {
-        PlayerPrefsRepository.DeleteDomain(_userId, DOMAIN);
-        Debug.Log($"{_userId}의 모든 {DOMAIN}데이터 제거");
-    }
-
 }

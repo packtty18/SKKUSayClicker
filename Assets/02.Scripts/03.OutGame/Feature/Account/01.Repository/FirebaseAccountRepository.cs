@@ -7,39 +7,20 @@ using UnityEngine;
 
 public class FirebaseAccountRepository : IAccountRepository
 {
+    private const string DOMAIN = "Account";
     public SafeEvent<SAccountResult> OnAuthCompleted = new();
 
     private bool _isInitialized => FirebaseService.IsInitialized;
-    private FirebaseAuth _auth;
-    private FirebaseFirestore _db;
+    private FirebaseAuth _auth => FirebaseService.Auth;
+    private FirebaseFirestore _db => FirebaseService.DB;
 
     public FirebaseAccountRepository()
     {
-        _auth = FirebaseService.Auth;
-        _db = FirebaseService.DB;
     }
 
     public void DeleteAll()
     {
         Debug.LogWarning("[Firebase] DeleteAll() is not supported");
-    }
-
-    public async UniTask<bool> Exists(string email)
-    {
-        try
-        {
-            //db에 해당 계정데이터가 존재하면 true 없으면 false
-            var snapshot = await _db
-                .Collection(email)
-                .GetSnapshotAsync()
-                .AsUniTask();
-            return true;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[Firebase DB] 로드 실패 : {e}");
-            return false;
-        }
     }
 
     public async UniTask<SAccountResult> LogIn(string email, string password)
@@ -59,30 +40,35 @@ public class FirebaseAccountRepository : IAccountRepository
     {
         try
         {
+            //계정 생성
             AuthResult result = await _auth.CreateUserWithEmailAndPasswordAsync(email, password).AsUniTask();
             string uid = result.User.UserId;
-            FirebaseUserDocument userDoc = new FirebaseUserDocument
-            {
-                Account = new FirebaseAccountSaveData(email),
-                Currency = new FirebaseCurrencySaveData
-                {
-                    Currencies = SCurrencySaveData.Default.Currencies
-                },
-                Upgrade = new FirebaseUpgradeSaveData
-                {
-                    Level = SUpgradeSaveData.Default.Level
-                },
-            };
 
-            await _db
-            .Collection("Users")
-            .Document(uid)
-            .SetAsync(userDoc);
+            //계정 생성시 계정 데이터 초기 생성
+            var batch = _db.StartBatch();
 
-            return new SAccountResult(true);
+            batch.Set(
+                _db.Collection("Account").Document(uid),
+                new FirebaseAccountSaveData(email)
+            );
+
+            batch.Set(
+                _db.Collection("Currency").Document(uid),
+                new FirebaseCurrencySaveData(SCurrencySaveData.Default)
+            );
+
+            batch.Set(
+                _db.Collection("Upgrade").Document(uid),
+                new FirebaseUpgradeSaveData(SUpgradeSaveData.Default)
+            );
+            await batch.CommitAsync();
+
+            return new SAccountResult(true, "성공");
         }
         catch (Exception e)
         {
+            if (_auth.CurrentUser != null)
+                await _auth.CurrentUser.DeleteAsync();
             return new SAccountResult(false, e.Message);
         }
 

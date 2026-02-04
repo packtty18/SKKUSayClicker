@@ -28,13 +28,13 @@ public class EmailValidator
             return syncResult;
         }
 
-        // 2. 비동기 중복 검증
-        var duplicateSpec = new AccountDuplicateSpecification(_repository);
-        bool isNotDuplicate = await duplicateSpec.IsSatisfiedByAsync(email);
-        if (!isNotDuplicate)
-        {
-            return ValidationResult.Fail(duplicateSpec.ErrorMessage);
-        }
+        //// 2. 비동기 중복 검증
+        //var duplicateSpec = new AccountDuplicateSpecification(_repository);
+        //bool isNotDuplicate = await duplicateSpec.IsSatisfiedByAsync(email);
+        //if (!isNotDuplicate)
+        //{
+        //    return ValidationResult.Fail(duplicateSpec.ErrorMessage);
+        //}
 
         return ValidationResult.Success();
     }

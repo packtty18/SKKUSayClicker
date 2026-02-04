@@ -33,7 +33,7 @@ public class LoginUI : MonoBehaviour
     private bool _isPasswordValid = false;
     private bool _isPasswordConfirmValid = false;
 
-    private void Start()
+    private void Awake()
     {
         if(_account.IsLogin)
         {

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -12,7 +13,7 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
         _userId = userId;
     }
 
-    public async UniTask Save(SCurrencySaveData saveData)
+    public async UniTaskVoid Save(SCurrencySaveData saveData)
     {
         // 어떻게든 Save한다.
         for (int i = 0; i < (int)ECurrencyType.Count; i++)

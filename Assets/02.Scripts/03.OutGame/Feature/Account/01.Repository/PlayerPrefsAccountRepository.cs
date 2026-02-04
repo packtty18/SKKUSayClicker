@@ -12,7 +12,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
     private const string SALT = "Salt";
 
 
-    public async UniTask<bool> Exists(string email)
+    public async UniTask<bool> IsExists(string email)
     {
         bool exists = PlayerPrefs.HasKey(
             PlayerPrefsKeyBuilder.GameData(email, DOMAIN, PASSWORD)
@@ -23,7 +23,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
 
     public async UniTask<SAccountResult> LogIn(string email, string password)
     {
-        var existResult = await Exists(email);
+        var existResult = await IsExists(email);
 
         if (!existResult)
             return await new UniTask<SAccountResult>(new SAccountResult(false, "Account not found", null));
@@ -43,7 +43,7 @@ public class PlayerPrefsAccountRepository : IAccountRepository
 
     public async UniTask<SAccountResult> Register(string email, string password)
     {
-        var existResult = await Exists(email);
+        var existResult = await IsExists(email);
 
         if (!existResult)
             return new SAccountResult(false, "Account already exists", null);

@@ -27,6 +27,8 @@ public class AccountManager : GlobalSingleton<AccountManager>
         _registerValidator = new RegisterValidator(_repository);
     }
 
+    
+
     // 로그인 시도 (비동기)
     public async UniTask<SAccountResult> TryLoginAsync(string email, string password)
     {

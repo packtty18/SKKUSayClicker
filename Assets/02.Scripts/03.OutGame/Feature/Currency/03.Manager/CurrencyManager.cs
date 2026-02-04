@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 
-public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
+public class CurrencyManager : GlobalSingleton<CurrencyManager>, ISaveManager
 {
     public static SafeEvent<ECurrencyType> OnDataChanged = new();
 
@@ -10,13 +10,10 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
 
     protected override void Init()
     {
-        _repository = new PlayerPrefsCurrencyRepository(AccountManager.Instance.Email);
-    }
-
-    private void Start()
-    {
+        _repository = new FirebaseCurrencyRepository();
         Load().Forget();
     }
+
     private async UniTask Load()
     {
         var result  = await _repository.Load();
@@ -25,7 +22,6 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
         {
             _currencies[i] = currencyValues[i];
         }
-
     }
 
     public SCurrency Get(ECurrencyType currencyType)
@@ -74,6 +70,7 @@ public class CurrencyManager : LocalSingleton<CurrencyManager>, ISaveManager
         {
             saveData.Currencies[i] = (float)_currencies[i];
         }
-        _repository.Save(saveData);
+
+        _repository.Save(saveData).Forget();
     }
 }

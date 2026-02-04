@@ -1,11 +1,12 @@
 
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
+public class UpgradeManager : GlobalSingleton<UpgradeManager>, ISaveManager
 {
     public SafeEvent OnDataChanged = new();
 
@@ -21,8 +22,14 @@ public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
     private IUpgradeRepository _repository;
     protected override void Init()
     {
-        _repository = new PlayerPrefsUpgradeRepository(AccountManager.Instance.Email);
-        int[] levels = _repository.Load().Level;
+        _repository = new FirebaseUpgradeRepository();
+        Load().Forget();
+    }
+
+    protected async UniTask Load()
+    {
+        var result = await _repository.Load();
+        int[] levels = result.Level;
 
         foreach (var specData in _specTable.Datas)
         {
@@ -34,7 +41,7 @@ public class UpgradeManager : LocalSingleton<UpgradeManager>, ISaveManager
 
         OnDataChanged?.Invoke();
     }
-    public Upgrade Get(EUpgradeType type)
+    public IReadOnlyUpgrade Get(EUpgradeType type)
     {
         _upgrades.TryGetValue(type, out var upgrade);
         return upgrade;

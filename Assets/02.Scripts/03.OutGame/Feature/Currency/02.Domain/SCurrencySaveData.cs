@@ -18,5 +18,14 @@ public struct SCurrencySaveData
 public class FirebaseCurrencySaveData
 {
     [FirestoreProperty]
-    public float[] Currencies { get; set; }
+    public float[] Currencies { get; private set; }
+
+    public FirebaseCurrencySaveData() 
+    { 
+    
+    }
+    public FirebaseCurrencySaveData(SCurrencySaveData data)
+    {
+        Currencies = data.Currencies;
+    }
 }

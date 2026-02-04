@@ -3,6 +3,6 @@ using Cysharp.Threading.Tasks;
 
 public interface ICurrencyRepository
 {
-    UniTask Save(SCurrencySaveData saveData);
+    UniTaskVoid Save(SCurrencySaveData saveData);
     UniTask<SCurrencySaveData> Load(); 
 }

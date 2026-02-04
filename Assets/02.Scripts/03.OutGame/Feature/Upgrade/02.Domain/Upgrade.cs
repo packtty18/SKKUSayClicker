@@ -4,7 +4,7 @@ public class Upgrade : IReadOnlyUpgrade
     public readonly UpgradeSpecData SpecData;
     public int Level { get; private set; }
     public SCurrency Cost => SpecData.BaseCost + Mathf.Pow(SpecData.CostMultiplier, Level-1);   // 지수공식
-    public float value => SpecData.BaseValue + Level * SpecData.ValueMultiplier;          //선형공식
+    public float Value => SpecData.BaseValue + Level * SpecData.ValueMultiplier;          //선형공식
     public bool IsMaxLevel => Level >= SpecData.MaxLevel;
 
     public UpgradeSpecData Spec => SpecData;
