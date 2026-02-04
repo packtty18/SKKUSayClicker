@@ -11,7 +11,7 @@ public class FeedbackPlayer : MonoBehaviour
         _feedbacks = GetComponentsInChildren<IFeedback>(true);
     }
 
-    public void PlayFeedbacks(SFeedbackData data = default)
+    public void PlayFeedbacks(FeedbackData data = default)
     {
         foreach (var feedback in _feedbacks)
         {

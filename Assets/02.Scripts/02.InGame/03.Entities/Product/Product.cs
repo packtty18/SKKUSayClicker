@@ -41,7 +41,7 @@ public class Product : MonoBehaviour, IClickable, IPlayFeedback, IFeedbackOwner
     public void OnClick()
     {
         float get = 100; // 나중에 데이터화하여 참조
-        SFeedbackData data = new SFeedbackData()
+        FeedbackData data = new FeedbackData()
         {
             TextType = EFloatTextType.Money,
             TextValue = get

@@ -10,7 +10,7 @@ public class AudioFeedback : FeedbackBase
     {
         _audio = GetComponent<AudioSource>();
     }
-    public override void Play(SFeedbackData data)
+    public override void Play(FeedbackData data)
     {
         if(_audio.isPlaying)
         {

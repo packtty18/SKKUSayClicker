@@ -5,7 +5,7 @@ public class ShakeFeedback : FeedbackBase
 {
     [SerializeField] private float shakeAmount = 0.15f;
 
-    public override void Play(SFeedbackData data)
+    public override void Play(FeedbackData data)
     {
         if (AllIn1Shaker.i != null)
         {

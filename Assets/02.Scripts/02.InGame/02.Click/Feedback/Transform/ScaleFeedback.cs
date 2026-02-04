@@ -18,7 +18,7 @@ public class ScaleFeedback : FeedbackBase
     {
         _originScale = OwnerTransform.localScale;
     }
-    public override void Play(SFeedbackData data)
+    public override void Play(FeedbackData data)
     {
         Vector3 targetScale = _originScale * _scaleMultiplier;
 

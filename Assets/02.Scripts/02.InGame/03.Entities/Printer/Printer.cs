@@ -80,7 +80,7 @@ public class Printer : MonoBehaviour, IClickable, IFeedbackOwner
 
     private void PlayClickFeedback(bool isCrit, float increase)
     {
-        SFeedbackData data = new SFeedbackData
+        FeedbackData data = new FeedbackData
         {
             TextValue = increase,
             TextType = isCrit

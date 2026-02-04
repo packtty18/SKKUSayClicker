@@ -37,7 +37,7 @@ public class HitFeedback : FeedbackBase
         _mpb = new MaterialPropertyBlock();
     }
 
-    public override void Play(SFeedbackData data)
+    public override void Play(FeedbackData data)
     {
         _currentTween?.Kill();
 

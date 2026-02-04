@@ -11,5 +11,5 @@ public abstract class FeedbackBase : MonoBehaviour, IFeedback
         _owner = GetComponentInParent<IFeedbackOwner>();
     }
 
-    public abstract void Play(SFeedbackData data);
+    public abstract void Play(FeedbackData data);
 }

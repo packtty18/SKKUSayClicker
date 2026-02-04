@@ -83,7 +83,7 @@ public class LoginUI : MonoBehaviour
         string email = _emailField.text;
         string password = _passwordField.text;
 
-        SAccountResult result = await _account.TryLoginAsync(email, password);
+        AccountResult result = await _account.TryLoginAsync(email, password);
         
         if (result.IsSuccess)
         {
@@ -103,7 +103,7 @@ public class LoginUI : MonoBehaviour
         string confirmPassword = _confirmField.text;
 
         // TryRegisterWithAllErrors를 사용하여 모든 에러를 한 번에 표시
-        SAccountResult result = await _account.TryRegisterAsync(email, password, confirmPassword);
+        AccountResult result = await _account.TryRegisterAsync(email, password, confirmPassword);
         
         if (result.IsSuccess)
         {

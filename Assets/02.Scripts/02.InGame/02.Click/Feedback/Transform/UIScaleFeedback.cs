@@ -30,7 +30,7 @@ public class UIScaleFeedback : FeedbackBase
         _originScale = _rectTransform.localScale;
     }
 
-    public override void Play(SFeedbackData data)
+    public override void Play(FeedbackData data)
     {
         if (_rectTransform == null)
             return;

@@ -4,7 +4,7 @@ public class TextFeedback : SpawnFeedback
 {
     [SerializeField] private EFloatTextType _type;
 
-    protected override void CheckInterface(GameObject target, SFeedbackData data)
+    protected override void CheckInterface(GameObject target, FeedbackData data)
     {
         if (target.TryGetComponent<IFloaterText>(out var floater))
         {
