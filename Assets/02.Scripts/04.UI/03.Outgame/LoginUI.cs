@@ -28,10 +28,6 @@ public class LoginUI : MonoBehaviour
     [SerializeField] private TMP_InputField _confirmField;
     [SerializeField] private TextMeshProUGUI _messageText;
 
-    // 검증 상태 추적
-    private bool _isEmailValid = false;
-    private bool _isPasswordValid = false;
-    private bool _isPasswordConfirmValid = false;
 
     private void Awake()
     {
@@ -116,121 +112,52 @@ public class LoginUI : MonoBehaviour
         }
     }
 
-    // 이메일 필드 검증 (실시간 - 동기 검증만)
     private void OnEmailTextChanged(string value)
     {
-        if (_mode == SceneMode.Login)
-        {
-            // 로그인 모드: 이메일 형식만 검증
-            var emailSpec = new EmailSpecification();
-            _isEmailValid = emailSpec.IsSatisfiedBy(value);
-            
-            if (!_isEmailValid)
-            {
-                ShowMessage(emailSpec.ErrorMessage, Color.yellow);
-            }
-            else
-            {
-                ClearMessage();
-            }
-        }
-        else
-        {
-            // 회원가입 모드: 이메일 형식 검증만 (중복 체크는 제출 시 수행)
-            var emailValidator = new EmailValidator(_account.Repository);
-            var result = emailValidator.Validate(value); // 동기 검증 (중복 체크 제외)
-            _isEmailValid = result.IsValid;
-            
-            if (!_isEmailValid)
-            {
-                ShowMessage(result.FirstError, Color.yellow);
-            }
-            else
-            {
-                ClearMessage();
-            }
-        }
-
-        UpdateButtonStates();
+        UpdateInputValidation();
     }
 
-    // 비밀번호 필드 검증
     private void OnPasswordTextChanged(string value)
     {
-        if (_mode == SceneMode.Login)
-        {
-            // 로그인 모드: 비밀번호 형식만 검증
-            var passwordSpec = new PasswordSpecification();
-            _isPasswordValid = passwordSpec.IsSatisfiedBy(value);
-            
-            if (!_isPasswordValid && !string.IsNullOrEmpty(value))
-            {
-                ShowMessage(passwordSpec.ErrorMessage, Color.yellow);
-            }
-            else if (_isEmailValid && _isPasswordValid)
-            {
-                ClearMessage();
-            }
-        }
-        else
-        {
-            // 회원가입 모드: 전체 비밀번호 검증
-            var passwordValidator = new PasswordValidator();
-            var result = passwordValidator.Validate(value);
-            _isPasswordValid = result.IsValid;
-            
-            if (!_isPasswordValid && !string.IsNullOrEmpty(value))
-            {
-                ShowMessage(result.FirstError, Color.yellow);
-            }
-            else if (_isEmailValid && _isPasswordValid)
-            {
-                ClearMessage();
-            }
-
-            // 비밀번호 확인 필드도 재검증
-            if (!string.IsNullOrEmpty(_confirmField.text))
-            {
-                OnPasswordConfirmTextChanged(_confirmField.text);
-            }
-        }
-
-        UpdateButtonStates();
+        UpdateInputValidation();
     }
 
-    // 비밀번호 확인 필드 검증 (회원가입 모드만)
     private void OnPasswordConfirmTextChanged(string value)
     {
-        if (_mode != SceneMode.Register)
-            return;
-
-        var matchSpec = new PasswordMatchSpecification();
-        _isPasswordConfirmValid = matchSpec.IsSatisfiedBy((_passwordField.text, value));
-
-        if (!_isPasswordConfirmValid && !string.IsNullOrEmpty(value))
-        {
-            ShowMessage(matchSpec.ErrorMessage, Color.yellow);
-        }
-        else if (_isEmailValid && _isPasswordValid && _isPasswordConfirmValid)
-        {
-            ClearMessage();
-        }
-
-        UpdateButtonStates();
+        UpdateInputValidation();
     }
 
-    // 버튼 활성화 상태 업데이트
-    private void UpdateButtonStates()
+    private void UpdateInputValidation()
     {
+        ValidationResult result;
+
         if (_mode == SceneMode.Login)
         {
-            // 로그인 버튼: 이메일 + 비밀번호 검증
-            _loginButton.interactable = _isEmailValid && _isPasswordValid;
+            result = _account.ValidateLoginInput(
+                _emailField.text,
+                _passwordField.text
+            );
+
+            _loginButton.interactable = result.IsValid;
         }
         else
         {
-            // 회원가입 확인 버튼: 이메일 + 비밀번호 + 비밀번호 확인 검증
-            _confirmButton.interactable = _isEmailValid && _isPasswordValid && _isPasswordConfirmValid;
+            result = _account.ValidateRegisterInput(
+                _emailField.text,
+                _passwordField.text,
+                _confirmField.text
+            );
+
+            _confirmButton.interactable = result.IsValid;
+        }
+
+        if (!result.IsValid)
+        {
+            ShowMessage(result.FirstError, Color.yellow);
+        }
+        else
+        {
+            ClearMessage();
         }
     }
 
@@ -276,11 +203,6 @@ public class LoginUI : MonoBehaviour
         _emailField.text = "";
         _passwordField.text = "";
         _confirmField.text = "";
-
-        // 검증 상태 초기화
-        _isEmailValid = false;
-        _isPasswordValid = false;
-        _isPasswordConfirmValid = false;
 
         // 버튼 상태 초기화
         _loginButton.interactable = false;

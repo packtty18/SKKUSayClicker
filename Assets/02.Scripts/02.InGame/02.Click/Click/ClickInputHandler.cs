@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 플레이어의 마우스 클릭에 대한 클릭 가능한 오브젝트의 실행 및 커서/이펙트 관리
 /// </summary>
-public class ClickManager : MonoBehaviour
+public class ClickInputHandler : MonoBehaviour
 {
     [Header("Click Detection")]
     [SerializeField] private LayerMask clickLayer;

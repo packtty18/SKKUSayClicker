@@ -14,9 +14,6 @@ public class UpgradeManager : GlobalSingleton<UpgradeManager>
 
     //매니저 내부에서는 Upgrade 조작 가능
     private readonly Dictionary<EUpgradeType, Upgrade> _upgrades = new();
-    //private List<Upgrade> Upgrades => _upgrades.Values.ToList<Upgrade>();
-
-    //외부에서는 함부로 Upgrade를 수정하지 못하도록 IReadonly로 주기
     public List<IReadOnlyUpgrade> Upgrades => _upgrades.Values.ToList<IReadOnlyUpgrade>();
 
     private IUpgradeRepository _repository;
@@ -66,10 +63,16 @@ public class UpgradeManager : GlobalSingleton<UpgradeManager>
 
         Upgrade upgrade = _upgrades[type];
 
-        CurrencyManager.Instance
-            .TrySpend(upgrade.SpecData.CostType, upgrade.Cost);
+        if(!CurrencyManager.Instance.TrySpend(upgrade.SpecData.CostType, upgrade.Cost))
+        {
+            return false;
+        }
+        
 
-        upgrade.TryLevelUp();
+        if(!upgrade.TryLevelUp())
+        {
+            return false;
+        }
 
         OnDataChanged?.Invoke();
         Save();

@@ -1623,7 +1623,7 @@ GameObject:
   - component: {fileID: 541708901}
   - component: {fileID: 541708902}
   m_Layer: 0
-  m_Name: ClickManager
+  m_Name: ClickInputHandler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

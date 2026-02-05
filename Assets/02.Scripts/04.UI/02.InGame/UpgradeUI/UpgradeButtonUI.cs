@@ -86,13 +86,7 @@ public class UpgradeButtonUI : MonoBehaviour, IFeedbackOwner
     public void OnClick()
     {
         //아직 피드백 완성 안됨
-        if (UpgradeManager.Instance.TryLevelUp(_type))
-        {
-            Refresh();
-        }
-        else
-        {
+        UpgradeManager.Instance.TryLevelUp(_type);
 
-        }
     }
 }

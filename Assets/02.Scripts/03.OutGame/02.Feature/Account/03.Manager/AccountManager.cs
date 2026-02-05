@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using NUnit.Framework.Constraints;
 using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
@@ -23,8 +24,8 @@ public class AccountManager : GlobalSingleton<AccountManager>
     {
         _repository = new FirebaseAccountRepository();
 
-        _loginValidator = new LoginValidator(_repository);
-        _registerValidator = new RegisterValidator(_repository);
+        _loginValidator = new LoginValidator();
+        _registerValidator = new RegisterValidator();
     }
 
     
@@ -32,20 +33,6 @@ public class AccountManager : GlobalSingleton<AccountManager>
     // 로그인 시도 (비동기)
     public async UniTask<AccountResult> TryLoginAsync(string email, string password)
     {
-        // 1. 입력에 대한 검증 (비동기 - 계정 존재 여부 체크 포함)
-        ValidationResult emailResult = await _loginValidator.ValidateEmailAsync(email);
-        if (!emailResult.IsValid)
-        {
-            return new AccountResult(false, emailResult.FirstError, null);
-        }
-
-        ValidationResult passwordResult = _loginValidator.ValidatePassword(password);
-        if (!passwordResult.IsValid)
-        {
-            return new AccountResult(false, passwordResult.FirstError, null);
-        }
-
-        // 2. 리포지토리에서의 검증 (해당 로그인의 정보가 리포지토리에 존재하는지 여부 등)
         AccountResult repositoryLogin = await _repository.LogIn(email, password);
         _currentEmail = repositoryLogin.Email;
         return repositoryLogin;
@@ -54,25 +41,6 @@ public class AccountManager : GlobalSingleton<AccountManager>
     // 회원가입 시도 (비동기)
     public async UniTask<AccountResult> TryRegisterAsync(string email, string password, string passwordConfirm)
     {
-        // 1. 입력의 검증 (비동기 - 중복 체크 포함)
-        ValidationResult emailResult = await _registerValidator.ValidateEmailAsync(email);
-        if (!emailResult.IsValid)
-        {
-            return new AccountResult(false, emailResult.FirstError, null);
-        }
-
-        ValidationResult passwordResult = _registerValidator.ValidatePassword(password);
-        if (!passwordResult.IsValid)
-        {
-            return new AccountResult(false, passwordResult.FirstError, null);
-        }
-
-        ValidationResult matchResult = _registerValidator.ValidatePasswordMatch(password, passwordConfirm);
-        if (!matchResult.IsValid)
-        {
-            return new AccountResult(false, matchResult.FirstError, null);
-        }
-
         AccountResult repositoryRegister = await _repository.Register(email, password);
         return repositoryRegister;
     }
@@ -80,5 +48,36 @@ public class AccountManager : GlobalSingleton<AccountManager>
     public void Logout()
     {
         _currentEmail = string.Empty;
+    }
+
+    public ValidationResult ValidateLoginInput(string email, string password)
+    {
+        ValidationResult emailResult = _loginValidator.ValidateEmail(email);
+        if (!emailResult.IsValid)
+            return emailResult;
+
+        ValidationResult passwordResult = _loginValidator.ValidatePassword(password);
+        if (!passwordResult.IsValid)
+            return passwordResult;
+
+        return ValidationResult.Success();
+    }
+
+    public ValidationResult ValidateRegisterInput(string email, string password, string confirmPassword)
+    {
+        ValidationResult emailResult = _registerValidator.ValidateEmail(email);
+        if (!emailResult.IsValid)
+            return emailResult;
+
+        ValidationResult passwordResult = _registerValidator.ValidatePassword(password);
+        if (!passwordResult.IsValid)
+            return passwordResult;
+
+        ValidationResult matchResult =
+            _registerValidator.ValidatePasswordMatch(password, confirmPassword);
+        if (!matchResult.IsValid)
+            return matchResult;
+
+        return ValidationResult.Success();
     }
 }
