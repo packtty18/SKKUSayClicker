@@ -6,10 +6,10 @@ public class PasswordValidator
     public PasswordValidator()
     {
         _validator = new SpecificationValidator<string>()
-            .Add(new PasswordSpecification())
-            .Add(new PasswordLengthSpecification())
-            .Add(new PasswordComplexitySpecification())
-            .Add(new PasswordCommonWordSpecification());
+            .Add(new PasswordSpecification())               //주어진 형식에 맞는가
+            .Add(new PasswordLengthSpecification())         //길이가 적절한가
+            .Add(new PasswordComplexitySpecification())     //충분히 복잡한가
+            .Add(new PasswordCommonWordSpecification());    //흔한 이름인가(블랙리스트랑 동일)
     }
 
     public ValidationResult Validate(string password)
