@@ -9,7 +9,7 @@ public class EmailValidator
     {
         // 동기 검증만 포함
         _syncValidator = new SpecificationValidator<string>()
-            .Add(new EmailSpecification())
+            .Add(new EmailSpaceSpecification())
             .Add(new EmailLengthSpecification())
             .Add(new EmailDomainSpecification())
             .Add(new EmailBlacklistSpecification());

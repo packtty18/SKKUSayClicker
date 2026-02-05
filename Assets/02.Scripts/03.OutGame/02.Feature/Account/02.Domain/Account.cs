@@ -12,8 +12,8 @@ public class Account
     [ShowInInspector, ReadOnly] public readonly bool IsSetted = false;
     public Account(string email, string password)
     {
-        EmailSpecification emailSpec = new EmailSpecification();
-        PasswordSpecification passwordSpec = new PasswordSpecification();
+        EmailSpaceSpecification emailSpec = new EmailSpaceSpecification();
+        PasswordSpaceSpecification passwordSpec = new PasswordSpaceSpecification();
 
         if (!emailSpec.IsSatisfiedBy(email)) throw new ArgumentException(emailSpec.ErrorMessage);
         if (!passwordSpec.IsSatisfiedBy(password)) throw new ArgumentException(passwordSpec.ErrorMessage);

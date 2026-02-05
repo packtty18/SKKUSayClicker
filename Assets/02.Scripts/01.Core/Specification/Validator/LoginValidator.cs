@@ -5,21 +5,15 @@ public class LoginValidator
 {
     public ValidationResult ValidateEmail(string email)
     {
-        //이메일 형식 검증
-        var emailSpec = new EmailSpecification();
-        if (!emailSpec.IsSatisfiedBy(email))
-        {
-            return ValidationResult.Fail(emailSpec.ErrorMessage);
-        }
+        var validator = new EmailValidator();
 
-        return ValidationResult.Success();
+        return validator.Validate(email);
     }
 
     public ValidationResult ValidatePassword(string password)
     {
-        var validator = new SpecificationValidator<string>()
-            .Add(new PasswordSpecification());
+        var validator = new PasswordValidator();
 
-        return validator.ValidateFast(password);
+        return validator.Validate(password);
     }
 }
