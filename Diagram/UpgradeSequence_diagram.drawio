@@ -1,0 +1,133 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.6 Chrome/140.0.7339.249 Electron/38.8.0 Safari/537.36" version="29.3.6">
+  <diagram name="페이지-1" id="ZJaMnvnrUDXf7HUHe_qi">
+    <mxGraphModel dx="1106" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" value="" vertex="1">
+          <mxGeometry height="160" width="20" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="UpgradeButtonUI" vertex="1">
+          <mxGeometry height="520" width="100" x="140" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-7" parent="opLJGrU6Za9DyZv0rv1v-2" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="50" width="10" x="45" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-47" parent="opLJGrU6Za9DyZv0rv1v-2" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="30" width="10" x="45" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-3" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="UpgradeManager" vertex="1">
+          <mxGeometry height="540" width="100" x="364" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-9" parent="opLJGrU6Za9DyZv0rv1v-3" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="420" width="10" x="45" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-21" parent="opLJGrU6Za9DyZv0rv1v-3" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="75" width="10" x="50" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-22" edge="1" parent="opLJGrU6Za9DyZv0rv1v-3" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" target="opLJGrU6Za9DyZv0rv1v-21" value="3. 강화 가능 여부 확인">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="85" y="155" />
+            </Array>
+            <mxPoint x="55" y="125" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-37" parent="opLJGrU6Za9DyZv0rv1v-3" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="40" width="10" x="52" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-38" edge="1" parent="opLJGrU6Za9DyZv0rv1v-3" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" target="opLJGrU6Za9DyZv0rv1v-37" value="9. 업그레이드 도메인&lt;br&gt;강화 요청">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="87" y="430" />
+            </Array>
+            <mxPoint x="57" y="400" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-4" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="CurrencyManager" vertex="1">
+          <mxGeometry height="385" width="130" x="525" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-23" parent="opLJGrU6Za9DyZv0rv1v-4" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="40" width="10" x="60" y="167.5" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-5" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="IUpgradeRepository" vertex="1">
+          <mxGeometry height="530" width="120" x="810" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-30" parent="opLJGrU6Za9DyZv0rv1v-5" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="40" width="10" x="55" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="ICurrencyRepository" vertex="1">
+          <mxGeometry height="365" width="120" x="670" y="72.5" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-13" parent="opLJGrU6Za9DyZv0rv1v-6" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="20" width="10" x="55" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-8" edge="1" parent="1" source="opLJGrU6Za9DyZv0rv1v-1" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-7" value="1.업그레이드 버튼 클릭">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="115" y="155" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-10" edge="1" parent="1" source="opLJGrU6Za9DyZv0rv1v-2" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-9" value="2. 강화 요청">
+          <mxGeometry relative="1" x="0.0024" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="245" y="175" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-15" parent="1" style="shape=umlLifeline;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=rectanglePerimeter;targetShapes=umlLifeline;participant=label;" value="CurrencyUI" vertex="1">
+          <mxGeometry height="380" width="100" x="250" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-25" edge="1" parent="1" source="opLJGrU6Za9DyZv0rv1v-23" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;" target="opLJGrU6Za9DyZv0rv1v-21" value="5. 재화 가능여부 판단">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="280" as="sourcePoint" />
+            <mxPoint x="420" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-26" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="false 경우&lt;br&gt;시퀸스 종료" vertex="1">
+          <mxGeometry height="40" width="150" x="430" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-24" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-23" value="4. 재화가 충분한지">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="424" y="250" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="50" width="10" x="585" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-14" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-13" value="7. 재화변경후 세이브">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="590" y="410" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-17" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="20" width="10" x="300" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-18" edge="1" parent="1" source="opLJGrU6Za9DyZv0rv1v-4" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-17" value="8. 데이터 변경으로 인한 자동 UI Refresh">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="534.5" y="430" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-12" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="opLJGrU6Za9DyZv0rv1v-11" value="6. 재화 소모 요청">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="413.5" y="400" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-31" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;" target="opLJGrU6Za9DyZv0rv1v-5" value="11.업그레이드 데이터 세이브">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="413.00352941176465" y="560" as="sourcePoint" />
+            <mxPoint x="964.68" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-48" edge="1" parent="1" source="opLJGrU6Za9DyZv0rv1v-9" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;" target="opLJGrU6Za9DyZv0rv1v-47" value="10. 데이터 변경으로 인한 자동 UI Refresh">
+          <mxGeometry relative="1" x="0.0005" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="130" y="730" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="opLJGrU6Za9DyZv0rv1v-51" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="false 경우&lt;br&gt;시퀸스 종료" vertex="1">
+          <mxGeometry height="40" width="150" x="435" y="510" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

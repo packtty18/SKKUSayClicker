@@ -1,0 +1,103 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.6 Chrome/140.0.7339.249 Electron/38.8.0 Safari/537.36" version="29.3.6">
+  <diagram name="페이지-1" id="pvUDrC0BRbVavJtpka1f">
+    <mxGraphModel dx="1106" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ItNxwSJar8U1Fakstav0-6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;" value="" vertex="1">
+          <mxGeometry height="490" width="20" x="70" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-7" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="LogInUI" vertex="1">
+          <mxGeometry height="490" width="100" x="150" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-11" parent="ItNxwSJar8U1Fakstav0-7" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="120" width="10" x="45" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-8" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="AccountManager" vertex="1">
+          <mxGeometry height="490" width="100" x="400" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-13" parent="ItNxwSJar8U1Fakstav0-8" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="80" width="10" x="45" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-37" parent="ItNxwSJar8U1Fakstav0-8" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="40" width="10" x="50" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-38" edge="1" parent="ItNxwSJar8U1Fakstav0-8" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" target="ItNxwSJar8U1Fakstav0-37" value="3.Validator로 검증 후&lt;br&gt;결과 반환">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="85" y="150" />
+            </Array>
+            <mxPoint x="55" y="120" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-10" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="IRepository" vertex="1">
+          <mxGeometry height="490" width="100" x="640" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-24" parent="ItNxwSJar8U1Fakstav0-10" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="130" width="10" x="-439.5" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-26" parent="ItNxwSJar8U1Fakstav0-10" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="80" width="10" x="-195" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-28" parent="ItNxwSJar8U1Fakstav0-10" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="40" width="10" x="45" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-25" edge="1" parent="ItNxwSJar8U1Fakstav0-10" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="ItNxwSJar8U1Fakstav0-24" value="5. 로그인/회원가입&lt;br&gt;버튼 입력">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-560.5" y="375.0000000000002" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-27" edge="1" parent="ItNxwSJar8U1Fakstav0-10" source="ItNxwSJar8U1Fakstav0-24" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="ItNxwSJar8U1Fakstav0-26" value="6. 로그인 혹은 회원가입 요청 전달">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-365" y="385" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-29" edge="1" parent="ItNxwSJar8U1Fakstav0-10" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="ItNxwSJar8U1Fakstav0-28" value="7. 로그인 혹은 회원가입 요청">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-190.5" y="395" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-30" edge="1" parent="ItNxwSJar8U1Fakstav0-10" source="ItNxwSJar8U1Fakstav0-28" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;" value="8. AccountResult 결과 반환">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="50" y="430" as="sourcePoint" />
+            <mxPoint x="-190.5" y="425" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-31" edge="1" parent="ItNxwSJar8U1Fakstav0-10" source="ItNxwSJar8U1Fakstav0-26" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;" value="9. return AccountResult">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-290" y="450" as="sourcePoint" />
+            <mxPoint x="-440.5" y="455" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-12" edge="1" parent="1" source="ItNxwSJar8U1Fakstav0-6" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="ItNxwSJar8U1Fakstav0-11" value="1. Email/Pw필드 입력">
+          <mxGeometry relative="1" x="0.0083" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="130" y="155" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-14" edge="1" parent="1" source="ItNxwSJar8U1Fakstav0-11" style="html=1;verticalAlign=bottom;startArrow=oval;endArrow=block;startSize=8;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" target="ItNxwSJar8U1Fakstav0-13" value="2. 인풋이 적절한지 검증">
+          <mxGeometry relative="1" x="-0.0037" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="275" y="185" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-20" edge="1" parent="1" source="ItNxwSJar8U1Fakstav0-13" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;" target="ItNxwSJar8U1Fakstav0-11" value="4. 검증결과 반환 결과로 UI변경">
+          <mxGeometry relative="1" x="-0.0037" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="450" y="240" as="sourcePoint" />
+            <mxPoint x="370" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-35" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;div&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;ValidationResult.IsValid =&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;true : 로그인/회원가입 버튼 활성화&lt;/span&gt;&lt;div style=&quot;font-size: 11px; text-wrap-mode: nowrap;&quot;&gt;false : 결과 TextUI.text&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: rgb(255, 255, 255);&quot;&gt;= ValidationResult&lt;/span&gt;&lt;span style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); background-color: rgb(255, 255, 255);&quot;&gt;.FirstError&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="290" x="220" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-32" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;div&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;AccountResult.IsSuccess =&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;true : 게임시작 버튼 활성화&lt;/span&gt;&lt;br style=&quot;font-size: 11px; text-wrap-mode: nowrap;&quot;&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;false : 결과 TextIUI.text&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;= AccountResult.Message&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="180" x="240" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="ItNxwSJar8U1Fakstav0-36" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="&lt;span style=&quot;font-size: 11px; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;게임시작 버튼 클릭시&lt;br&gt;MySceneManager를 통해 씬 이동&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="180" x="60" y="640" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
