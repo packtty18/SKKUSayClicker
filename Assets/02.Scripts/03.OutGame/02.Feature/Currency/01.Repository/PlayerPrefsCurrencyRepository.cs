@@ -42,19 +42,18 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
 
     public UniTask<CurrencySaveData> Load()
     {
-        CurrencySaveData data = CurrencySaveData.Default;
-
+        float[] currencies = new float[(int)ECurrencyType.Count];
         for (int i = 0; i < (int)ECurrencyType.Count; i++)
         {
             var type = (ECurrencyType)i;
 
             if (PlayerPrefs.HasKey(PlayerPrefsKeyBuilder.GameData(_userId, DOMAIN, type.ToString())))
             {
-                data.Currencies[i] =
-                    UserScopedPlayerPrefs.GetFloat(_userId, DOMAIN, type.ToString());
+                currencies[i] = UserScopedPlayerPrefs.GetFloat(_userId, DOMAIN, type.ToString());
             }
         }
 
+        Timestamp timestamp = Timestamp.FromDateTime(DateTime.MinValue);
         if (PlayerPrefs.HasKey(PlayerPrefsKeyBuilder.GameData(_userId, DOMAIN, LAST_SAVED_AT_KEY)))
         {
             string savedLastTime = UserScopedPlayerPrefs.GetString(_userId,DOMAIN,LAST_SAVED_AT_KEY,"0");
@@ -63,10 +62,12 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
             if (long.TryParse(savedLastTime, out long ticks))
             {
                 DateTime utcTime = new DateTime(ticks, DateTimeKind.Utc);
-                data.LastSavedAt = Timestamp.FromDateTime(utcTime);
+                timestamp = Timestamp.FromDateTime(utcTime);
             }
+            
         }
 
+        CurrencySaveData data = new CurrencySaveData(currencies, timestamp);
         return UniTask.FromResult(data);
     }
 

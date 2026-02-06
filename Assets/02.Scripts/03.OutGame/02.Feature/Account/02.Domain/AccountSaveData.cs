@@ -3,13 +3,13 @@ using System;
 
 [Serializable]
 [FirestoreData]
-public class FirebaseAccountSaveData
+public class AccountSaveData
 {
     [FirestoreProperty]
     public string Email { get; set; }
-    public FirebaseAccountSaveData()
+    public AccountSaveData()
     { }
-    public FirebaseAccountSaveData(string email)
+    public AccountSaveData(string email)
     {
         Email = email;
     }

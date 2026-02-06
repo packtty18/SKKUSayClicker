@@ -16,23 +16,23 @@ public class FirebaseUpgradeRepository : IUpgradeRepository
     {
 
     }
+
     public async UniTask<UpgradeSaveData> Load()
     {
         try
         {
             string uid = _auth.CurrentUser.UserId;
-            DocumentSnapshot snapshot =
-                await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
+            var snapshot = await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
 
-            FirebaseUpgradeSaveData save = snapshot.ConvertTo<FirebaseUpgradeSaveData>();
-            UpgradeSaveData result = UpgradeSaveData.FromFirebase(save);
-            return result;
+            if (!snapshot.Exists)
+                return UpgradeSaveData.CreateDefault();
+
+            return snapshot.ConvertTo<UpgradeSaveData>();
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            UpgradeSaveData result = UpgradeSaveData.Default;
-            Debug.LogError("업그레이드 로드 실패" + ex.Message);
-            return result;
+            Debug.LogError("[FirebaseUpgradeRepository] Load Failed: " + e.Message);
+            return UpgradeSaveData.CreateDefault();
         }
     }
 
@@ -41,8 +41,7 @@ public class FirebaseUpgradeRepository : IUpgradeRepository
         try
         {
             string uid = _auth.CurrentUser.UserId;
-            FirebaseUpgradeSaveData save = new FirebaseUpgradeSaveData(upgrade);
-            await _db.Collection(DOMAIN).Document(uid).SetAsync(save);
+            await _db.Collection(DOMAIN).Document(uid).SetAsync(upgrade);
         }
         catch (Exception e)
         {

@@ -21,21 +21,25 @@ public class CurrencyManager : GlobalSingleton<CurrencyManager>
         _hybridRepository = new HybridCurrencyRepository();
         Load().Forget();
     }
+    public void Save()
+    {
+        CurrencySaveData saveData = CurrencySaveData.FromRuntime(_currencies);
+        //하이브리드 리포지토리로 저장 위임
+        _hybridRepository.Save(saveData).Forget();
+    }
 
     private async UniTask Load()
     {
-        CurrencySaveData result = CurrencySaveData.Default;
-
         try
         {
+            CurrencySaveData result;
             result = await _hybridRepository.Load();
+            ApplyData(result);
         }
         catch (Exception e)
         {
             Debug.LogWarning($"[CurrencyManager] 서버 로드 실패함: {e.Message}");
         }
-
-        ApplyData(result);
     }
 
     private void ApplyData(CurrencySaveData data)
@@ -91,18 +95,5 @@ public class CurrencyManager : GlobalSingleton<CurrencyManager>
         return _currencies[(int)type] >= amount;
     }
 
-    public UniTask Save()
-    {
-        //세이브 데이터 제작
-        var saveData = CurrencySaveData.Default;
-        for (int i = 0; i < _currencies.Length; i++)
-        {
-            saveData.Currencies[i] = (float)_currencies[i];
-        }
-        saveData.LastSavedAt = Timestamp.FromDateTime(DateTime.UtcNow);
-
-        //하이브리드 리포지토리로 저장 위임
-        _hybridRepository.Save(saveData).Forget();
-        return UniTask.CompletedTask;
-    }
+   
 }

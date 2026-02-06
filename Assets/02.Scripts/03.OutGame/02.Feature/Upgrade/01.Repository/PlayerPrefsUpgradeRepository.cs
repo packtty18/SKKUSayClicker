@@ -13,12 +13,13 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
     {
         _userId = userId;
     }
+
     public UniTask Save(UpgradeSaveData saveData)
     {
-        for (int i = 0; i < (int)EUpgradeType.Count; i++)
+        for (int i = 0; i < (int)ECurrencyType.Count; i++)
         {
-            var type = (EUpgradeType)i;
-            UserScopedPlayerPrefs.SetInt(
+            var type = (ECurrencyType)i;
+            UserScopedPlayerPrefs.SetFloat(
                 _userId,
                 DOMAIN,
                 type.ToString(),
@@ -29,26 +30,27 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
         //TimeStamp => DateTime => UTC 정규화 => long 형식으로 바꾸기 => tostring
         long convertedTime = saveData.LastSavedAt.ToDateTime().ToUniversalTime().Ticks;
 
+
         UserScopedPlayerPrefs.SetString(_userId, DOMAIN, LAST_SAVED_AT_KEY, convertedTime.ToString());
 
         return UniTask.CompletedTask;
     }
 
+
     public UniTask<UpgradeSaveData> Load()
     {
-        UpgradeSaveData data = UpgradeSaveData.Default;
-
+        int[] levels = new int[(int)EUpgradeType.Count];
         for (int i = 0; i < (int)EUpgradeType.Count; i++)
         {
             var type = (EUpgradeType)i;
 
             if (PlayerPrefs.HasKey(PlayerPrefsKeyBuilder.GameData(_userId, DOMAIN, type.ToString())))
             {
-                data.Levels[i] =
-                    UserScopedPlayerPrefs.GetInt(_userId, DOMAIN, type.ToString());
+                levels[i] = UserScopedPlayerPrefs.GetInt(_userId, DOMAIN, type.ToString());
             }
         }
 
+        Timestamp timestamp = Timestamp.FromDateTime(DateTime.MinValue);
         if (PlayerPrefs.HasKey(PlayerPrefsKeyBuilder.GameData(_userId, DOMAIN, LAST_SAVED_AT_KEY)))
         {
             string savedLastTime = UserScopedPlayerPrefs.GetString(_userId, DOMAIN, LAST_SAVED_AT_KEY, "0");
@@ -57,11 +59,12 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
             if (long.TryParse(savedLastTime, out long ticks))
             {
                 DateTime utcTime = new DateTime(ticks, DateTimeKind.Utc);
-                data.LastSavedAt = Timestamp.FromDateTime(utcTime);
+                timestamp = Timestamp.FromDateTime(utcTime);
             }
+
         }
 
+        UpgradeSaveData data = new UpgradeSaveData(levels, timestamp);
         return UniTask.FromResult(data);
     }
-
 }

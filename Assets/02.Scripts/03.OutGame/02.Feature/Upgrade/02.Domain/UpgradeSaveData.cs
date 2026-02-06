@@ -1,30 +1,51 @@
 using Firebase.Firestore;
 using System;
-using UnityEngine;
+using UnityEditor.Rendering.Universal;
 
-public struct UpgradeSaveData
+
+[Serializable]
+[FirestoreData]
+public class UpgradeSaveData
 {
-    public int[] Levels;
-    public Timestamp LastSavedAt;
+    [FirestoreProperty]
+    public int[] Levels { get; private set; }
+    [FirestoreProperty]
+    public Timestamp LastSavedAt { get; private set; }
 
-    // 재화 기본값
-    public static UpgradeSaveData Default => new UpgradeSaveData()
-    {
-        Levels = new int[(int)EUpgradeType.Count],
-        LastSavedAt = Timestamp.FromDateTime(DateTime.MinValue),
-    };
+    public UpgradeSaveData() { }
 
-    public static UpgradeSaveData FromFirebase(FirebaseUpgradeSaveData firebaseData)
+    public UpgradeSaveData(UpgradeSaveData data)
     {
-        if (firebaseData == null)
+        Levels = data.Levels;
+        LastSavedAt = data.LastSavedAt;
+    }
+
+    //로드용도
+    public UpgradeSaveData(int[] levels, Timestamp lastSavedAt)
+    {
+        Levels = levels;
+        LastSavedAt = lastSavedAt;
+    }
+
+    //세이브 용도 , 초기 상태 생성하기
+    public static UpgradeSaveData CreateDefault()
+    {
+        return new UpgradeSaveData(new int[(int)EUpgradeType.Count],
+            Timestamp.FromDateTime(DateTime.UtcNow));
+    }
+
+    //현재 저장된 데이터를 세이브 데이터로 바꾸기
+    public static UpgradeSaveData FromRuntime(IReadOnlyUpgrade[] upgrade)
+    {
+        int[] target = new int[upgrade.Length];
+        for (int i = 0; i < upgrade.Length; i++)
         {
-            return Default;
+            target[i] = upgrade[i].Level;
         }
 
-        return new UpgradeSaveData
-        {
-            Levels = firebaseData.Levels,
-            LastSavedAt = firebaseData.LastSavedAt,
-        };
+        return new UpgradeSaveData(
+            target,
+            Timestamp.FromDateTime(DateTime.UtcNow)
+        );
     }
 }

@@ -1,37 +1,41 @@
 using Cysharp.Threading.Tasks;
-using Firebase.Firestore;
 using System;
 using System.Threading;
 using UnityEngine;
 
-//로컬과 서버 둘다 사용하는 리포지토리
-public class HybridCurrencyRepository : ICurrencyRepository
+public class HybridUpgradeRepository : IUpgradeRepository
 {
-    private readonly ICurrencyRepository _local;
-    private readonly ICurrencyRepository _server;
+    private readonly IUpgradeRepository _local;
+    private readonly IUpgradeRepository _server;
 
-    public HybridCurrencyRepository()
+    private float _saveDelaySeconds = 0.6f;
+    private int _firebaseSaveInterval = 5;
+
+    private CancellationTokenSource _saveCts;
+    private int _saveCount;
+
+    public HybridUpgradeRepository()
     {
-        _server = new FirebaseCurrencyRepository();
-        _local = new PlayerPrefsCurrencyRepository(AccountManager.Instance.Email);
+        _server = new FirebaseUpgradeRepository();
+        _local = new PlayerPrefsUpgradeRepository(AccountManager.Instance.Email);
     }
 
-    public async UniTask<CurrencySaveData> Load()
+    public async UniTask<UpgradeSaveData> Load()
     {
-        CurrencySaveData local = await _local.Load();
-        CurrencySaveData server = await _server.Load();
+        UpgradeSaveData local = await _local.Load();
+        UpgradeSaveData server = await _server.Load();
 
-        CurrencySaveData selected = SelectLatest(server, local);
+        UpgradeSaveData selected = SelectLatest(server, local);
 
         return selected;
     }
 
-    private CurrencySaveData SelectLatest(CurrencySaveData server,CurrencySaveData local)
+    private UpgradeSaveData SelectLatest(UpgradeSaveData server, UpgradeSaveData local)
     {
         bool isServerLatest = server.LastSavedAt >= local.LastSavedAt;
 
         Debug.Log(
-            $"[HybridCurrencyRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
+            $"[HybridUpgradeRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
             $"ServerTime: {server.LastSavedAt.ToDateTime():O}, " +
             $"LocalTime: {local.LastSavedAt.ToDateTime():O}"
         );
@@ -39,13 +43,9 @@ public class HybridCurrencyRepository : ICurrencyRepository
         return isServerLatest ? server : local;
     }
 
-    [SerializeField] private float _saveDelaySeconds = 0.6f;
-    [SerializeField] private int _firebaseSaveInterval = 5;
 
-    private CancellationTokenSource _saveCts;
-    private int _saveCount;
 
-    public UniTask Save(CurrencySaveData saveData)
+    public UniTask Save(UpgradeSaveData saveData)
     {
         _saveCts?.Cancel();     //이전 예약이 있다면 취소
         _saveCts?.Dispose();    //완전히 리소스를 해제. 이후 
@@ -58,7 +58,7 @@ public class HybridCurrencyRepository : ICurrencyRepository
     }
 
 
-    private async UniTaskVoid SaveWithDelay(CurrencySaveData saveData, CancellationToken token)
+    private async UniTaskVoid SaveWithDelay(UpgradeSaveData saveData, CancellationToken token)
     {
         //도중에 토큰이 Cancel 되면 catch 실행.
         try
@@ -76,20 +76,19 @@ public class HybridCurrencyRepository : ICurrencyRepository
             // 아직 취소로직은 없음 그냥 세이브 안함
         }
     }
-
-    private void ExecuteSave(CurrencySaveData saveData)
+    private void ExecuteSave(UpgradeSaveData saveData)
     {
         _saveCount++;
-        
+
         if (_saveCount % _firebaseSaveInterval == 0)
         {
             _server.Save(saveData).Forget();
-            Debug.Log($"[HybridCurrencyRepository] {_saveCount} Firebase Save executed");
+            Debug.Log($"[HybridUpgradeRepository] {_saveCount} Firebase Save executed");
         }
         else
         {
             _local.Save(saveData).Forget();
-            Debug.Log($"[HybridCurrencyRepository] {_saveCount} Local Save executed");
+            Debug.Log($"[HybridUpgradeRepository] {_saveCount} Local Save executed");
         }
     }
 }

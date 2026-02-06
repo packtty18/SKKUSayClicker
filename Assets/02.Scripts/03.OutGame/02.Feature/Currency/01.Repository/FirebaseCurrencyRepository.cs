@@ -23,28 +23,27 @@ public class FirebaseCurrencyRepository : ICurrencyRepository
         try
         {
             string uid = _auth.CurrentUser.UserId;
-            DocumentSnapshot snapshot =
-                await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
+            var snapshot = await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
 
-            FirebaseCurrencySaveData save = snapshot.ConvertTo<FirebaseCurrencySaveData>();
-            CurrencySaveData result = CurrencySaveData.FromFirebase(save);
-            return result;
+            if (!snapshot.Exists)
+                return CurrencySaveData.CreateDefault();
+
+            return snapshot.ConvertTo<CurrencySaveData>();
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            CurrencySaveData result = CurrencySaveData.Default;
-            Debug.LogError("재화 로드 실패" + ex.Message);
-            return result;
+            Debug.LogError("[FirebaseCurrencyRepository] Load Failed: " + e.Message);
+            return CurrencySaveData.CreateDefault();
         }
     }
+
 
     public async UniTask Save(CurrencySaveData saveData)
     {
         try
         {
             string uid = _auth.CurrentUser.UserId;
-            FirebaseCurrencySaveData save = new FirebaseCurrencySaveData(saveData);
-            await _db.Collection(DOMAIN).Document(uid).SetAsync(save);
+            await _db.Collection(DOMAIN).Document(uid).SetAsync(saveData);
         }
         catch(Exception e)
         {

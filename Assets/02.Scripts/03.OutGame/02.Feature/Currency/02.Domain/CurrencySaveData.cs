@@ -1,27 +1,44 @@
 using Firebase.Firestore;
 using System;
 
-public struct CurrencySaveData
+[Serializable]
+[FirestoreData]
+public class CurrencySaveData
 {
-    public float[] Currencies;
-    public Timestamp LastSavedAt;
-    public static CurrencySaveData Default => new CurrencySaveData()
-    {
-        Currencies = new float[(int)ECurrencyType.Count],
-        LastSavedAt = Timestamp.FromDateTime(DateTime.MinValue),
-    };
+    [FirestoreProperty]
+    public float[] Currencies { get; private set; }
+    [FirestoreProperty]
+    public Timestamp LastSavedAt { get; private set; }
 
-    public static CurrencySaveData FromFirebase(FirebaseCurrencySaveData firebaseData)
+    public CurrencySaveData() { }
+
+    //로드용도
+    public CurrencySaveData(float[] currencies, Timestamp lastSavedAt)
     {
-        if (firebaseData == null)
+        Currencies = currencies;
+        LastSavedAt = lastSavedAt;
+    }
+
+
+    //세이브 전용. 초기 상태 생성하기
+    public static CurrencySaveData CreateDefault()
+    {
+        return new CurrencySaveData(new float[(int)ECurrencyType.Count], 
+            Timestamp.FromDateTime(DateTime.UtcNow));
+    }
+
+    //현재 런타임 데이터를 세이브 데이터로 바꾸기
+    public static CurrencySaveData FromRuntime(Currency[] currencies)
+    {
+        float[] target = new float[currencies.Length];
+        for (int i = 0; i < currencies.Length; i++)
         {
-            return Default;
+            target[i] = (float)currencies[i];
         }
-
-        return new CurrencySaveData
-        {
-            Currencies = firebaseData.Currencies,
-            LastSavedAt = firebaseData.LastSavedAt,
-        };
+        
+        return new CurrencySaveData(
+            target,
+            Timestamp.FromDateTime(DateTime.UtcNow)
+        );
     }
 }

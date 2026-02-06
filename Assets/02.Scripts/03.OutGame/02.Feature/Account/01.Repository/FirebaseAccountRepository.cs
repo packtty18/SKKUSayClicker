@@ -49,21 +49,19 @@ public class FirebaseAccountRepository : IAccountRepository
 
             batch.Set(
                 _db.Collection("Account").Document(uid),
-                new FirebaseAccountSaveData(email)
+                new AccountSaveData(email)
             );
 
-            CurrencySaveData currency = CurrencySaveData.Default;
-            currency.LastSavedAt = Timestamp.FromDateTime(DateTime.UtcNow);
+            CurrencySaveData currency = CurrencySaveData.CreateDefault();
             batch.Set(
                 _db.Collection("Currency").Document(uid),
-                new FirebaseCurrencySaveData(currency)
+                currency
             );
 
-            UpgradeSaveData upgrade = UpgradeSaveData.Default;
-            currency.LastSavedAt = Timestamp.FromDateTime(DateTime.UtcNow);
+            UpgradeSaveData upgrade = UpgradeSaveData.CreateDefault();
             batch.Set(
                 _db.Collection("Upgrade").Document(uid),
-                new FirebaseUpgradeSaveData(upgrade)
+                new UpgradeSaveData(upgrade)
             );
             await batch.CommitAsync();
 
