@@ -27,8 +27,7 @@ public class FirebaseCurrencyRepository : ICurrencyRepository
                 await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
 
             FirebaseCurrencySaveData save = snapshot.ConvertTo<FirebaseCurrencySaveData>();
-            CurrencySaveData result = CurrencySaveData.Default;
-            result.Currencies = save.Currencies;
+            CurrencySaveData result = CurrencySaveData.FromFirebase(save);
             return result;
         }
         catch (Exception ex)

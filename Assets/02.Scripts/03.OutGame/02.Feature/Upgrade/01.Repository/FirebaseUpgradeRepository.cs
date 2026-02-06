@@ -25,8 +25,7 @@ public class FirebaseUpgradeRepository : IUpgradeRepository
                 await _db.Collection(DOMAIN).Document(uid).GetSnapshotAsync();
 
             FirebaseUpgradeSaveData save = snapshot.ConvertTo<FirebaseUpgradeSaveData>();
-            UpgradeSaveData result = UpgradeSaveData.Default;
-            result.Level = save.Level;
+            UpgradeSaveData result = UpgradeSaveData.FromFirebase(save);
             return result;
         }
         catch (Exception ex)
