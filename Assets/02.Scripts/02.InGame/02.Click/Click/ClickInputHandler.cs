@@ -1,10 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// 플레이어의 마우스 클릭에 대한 클릭 가능한 오브젝트의 실행 및 커서/이펙트 관리
-/// </summary>
-public class ClickInputHandler : MonoBehaviour
+public class ClickInputHandler : LocalSingleton<ClickInputHandler>
 {
     [Header("Click Detection")]
     [SerializeField] private LayerMask clickLayer;
@@ -25,11 +22,11 @@ public class ClickInputHandler : MonoBehaviour
     private bool _isHoveringClickable;
     private bool _isClickAnimating;
 
-    private void Awake()
+    public SafeEvent OnClick = new SafeEvent();
+    protected override void Init()
     {
         _camera = Camera.main;
         SetCursor(normalCursor);
-        Debug.Log("[ClickManager] Initialized");
     }
 
     private void Update()
@@ -85,6 +82,8 @@ public class ClickInputHandler : MonoBehaviour
             PlayParticleEffect(clickableObjectParticle, worldPos);
             StartCoroutine(PlayClickCursorAnimation(clickableClickCursor, hoverCursor));
         }
+
+        OnClick?.Invoke();
     }
 
     private IEnumerator PlayClickCursorAnimation(Texture2D clickTexture, Texture2D returnTexture)
@@ -146,4 +145,6 @@ public class ClickInputHandler : MonoBehaviour
     {
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
+
+    
 }

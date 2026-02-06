@@ -1,0 +1,95 @@
+using Cysharp.Threading.Tasks;
+using Firebase.Firestore;
+using System;
+using System.Threading;
+using UnityEngine;
+
+//로컬과 서버 둘다 사용하는 리포지토리
+public class HybridCurrencyRepository : ICurrencyRepository
+{
+    private readonly ICurrencyRepository _local;
+    private readonly ICurrencyRepository _server;
+
+    public HybridCurrencyRepository()
+    {
+        _server = new FirebaseCurrencyRepository();
+        _local = new PlayerPrefsCurrencyRepository(AccountManager.Instance.Email);
+    }
+
+    public async UniTask<CurrencySaveData> Load()
+    {
+        CurrencySaveData local = await _local.Load();
+        CurrencySaveData server = await _server.Load();
+
+        CurrencySaveData selected = SelectLatest(server, local);
+
+        return selected;
+    }
+
+    private CurrencySaveData SelectLatest(CurrencySaveData server,CurrencySaveData local)
+    {
+        bool isServerLatest = server.LastSavedAt >= local.LastSavedAt;
+
+        Debug.Log(
+            $"[HybridCurrencyRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
+            $"ServerTime: {server.LastSavedAt.ToDateTime():O}, " +
+            $"LocalTime: {local.LastSavedAt.ToDateTime():O}"
+        );
+
+        return isServerLatest ? server : local;
+    }
+
+    [SerializeField] private float _saveDelaySeconds = 0.6f;
+    [SerializeField] private int _firebaseSaveInterval = 5;
+
+    private CancellationTokenSource _saveCts;
+    private int _saveCount;
+
+    public UniTask Save(CurrencySaveData saveData)
+    {
+        _saveCts?.Cancel();     //이전 예약이 있다면 취소
+        _saveCts?.Dispose();    //완전히 리소스를 해제. 이후 
+
+        _saveCts = new CancellationTokenSource();
+
+        //해당 토큰을 사용하는 비동기 함수 실행
+        SaveWithDelay(saveData, _saveCts.Token).Forget();
+        return UniTask.CompletedTask;
+    }
+
+
+    private async UniTaskVoid SaveWithDelay(CurrencySaveData saveData, CancellationToken token)
+    {
+        //도중에 토큰이 Cancel 되면 catch 실행.
+        try
+        {
+            //세이브 대기시간 동안 대기 + Cancellation 토큰을 등록함
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(_saveDelaySeconds)
+                , cancellationToken: token);
+
+            ExecuteSave(saveData);
+        }
+        catch (OperationCanceledException)
+        {
+            // 정상적인 취소 (새 Save 요청 들어옴)
+            // 아직 취소로직은 없음 그냥 세이브 안함
+        }
+    }
+
+    private void ExecuteSave(CurrencySaveData saveData)
+    {
+        _saveCount++;
+        
+        if (_saveCount % _firebaseSaveInterval == 0)
+        {
+            _server.Save(saveData).Forget();
+            Debug.Log($"[CurrencyManager] {_saveCount} Firebase Save executed");
+        }
+        else
+        {
+            _local.Save(saveData).Forget();
+            Debug.Log($"[CurrencyManager] {_saveCount} Local Save executed");
+        }
+    }
+}
