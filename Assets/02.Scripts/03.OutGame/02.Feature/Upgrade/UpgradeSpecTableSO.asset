@@ -59,7 +59,7 @@ MonoBehaviour:
       \uAC78\uB9AC\uB294 \uC2DC\uAC04\uC774 \uAC10\uC18C\uD55C\uB2E4."
     Icon: {fileID: 1138137278, guid: 6582f34ddd5f686408c019550cd94c9d, type: 3}
   - Type: 4
-    MaxLevel: 50100
+    MaxLevel: 100
     CostType: 0
     BaseCost: 1000
     BaseValue: 1

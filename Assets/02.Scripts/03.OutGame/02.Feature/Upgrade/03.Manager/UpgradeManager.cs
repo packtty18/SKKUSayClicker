@@ -19,6 +19,15 @@ public class UpgradeManager : GlobalSingleton<UpgradeManager>
     private IUpgradeRepository _repository;
     protected override void Init()
     {
+        try
+        {
+            _specTable.CheckValidate();
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new ArgumentException(ex.Message);
+        }
+
         _repository = new FirebaseUpgradeRepository();
         Load().Forget();
     }

@@ -13,7 +13,7 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
         _userId = userId;
     }
 
-    public async UniTaskVoid Save(CurrencySaveData saveData)
+    public UniTask Save(CurrencySaveData saveData)
     {
         // 어떻게든 Save한다.
         for (int i = 0; i < (int)ECurrencyType.Count; i++)
@@ -21,9 +21,11 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
             var type = (ECurrencyType)i;
             UserScopedPlayerPrefs.SetFloat(_userId, DOMAIN, type.ToString(), saveData.Currencies[i]);//.ToString("G17")); //
         }
+
+        return UniTask.CompletedTask;
     }
 
-    public async UniTask<CurrencySaveData> Load()
+    public UniTask<CurrencySaveData> Load()
     {
         CurrencySaveData data = CurrencySaveData.Default;
 
@@ -38,6 +40,6 @@ public class PlayerPrefsCurrencyRepository : ICurrencyRepository
             }
         }
 
-        return data;
+        return UniTask.FromResult(data);
     }
 }

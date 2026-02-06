@@ -10,7 +10,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
     {
         _userId = userId;
     }
-    public async UniTaskVoid Save(UpgradeSaveData upgrade)
+    public UniTask Save(UpgradeSaveData upgrade)
     {
         for (int i = 0; i < (int)EUpgradeType.Count; i++)
         {
@@ -22,9 +22,11 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
                 upgrade.Level[i]
             );
         }
+
+        return UniTask.CompletedTask;
     }
 
-    public async UniTask<UpgradeSaveData> Load()
+    public UniTask<UpgradeSaveData> Load()
     {
         UpgradeSaveData data = UpgradeSaveData.Default;
 
@@ -39,6 +41,6 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
             }
         }
 
-        return data;
+        return UniTask.FromResult(data);
     }
 }

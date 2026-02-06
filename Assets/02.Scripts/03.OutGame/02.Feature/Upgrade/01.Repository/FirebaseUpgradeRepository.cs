@@ -37,7 +37,7 @@ public class FirebaseUpgradeRepository : IUpgradeRepository
         }
     }
 
-    public async UniTaskVoid Save(UpgradeSaveData upgrade)
+    public async UniTask Save(UpgradeSaveData upgrade)
     {
         try
         {

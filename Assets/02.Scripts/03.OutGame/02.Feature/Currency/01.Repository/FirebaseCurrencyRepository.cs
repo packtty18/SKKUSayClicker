@@ -39,7 +39,7 @@ public class FirebaseCurrencyRepository : ICurrencyRepository
         }
     }
 
-    public async UniTaskVoid Save(CurrencySaveData saveData)
+    public async UniTask Save(CurrencySaveData saveData)
     {
         try
         {
