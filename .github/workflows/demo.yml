@@ -4,11 +4,13 @@ on:
   push:
     branches: [ web_build ]
   schedule:
-    - cron: "0 3 * * *" # 매일 UTC 3시 (한국시간 오후 12시)
+    - cron: "0 0 * * *" # 매일 UTC 0시 = 한국시간 오전 9시
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
   check-changes:
@@ -42,9 +44,9 @@ jobs:
             exit 0
           fi
           
-          # 스케줄 실행인 경우 - web_build 브랜치 체크
-          git fetch origin web_build
-          git checkout web_build
+          # 스케줄 실행인 경우 - main 브랜치 체크
+          git fetch origin main
+          git checkout main
           
           # 지난 24시간 이내 커밋이 있는지 확인
           COMMITS_LAST_24H=$(git log --since="24 hours ago" --oneline | wc -l)
@@ -83,6 +85,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'schedule' && 'main' || github.ref }}
           fetch-depth: 0
 
       # 2. 이전 빌드 성공 커밋 찾기
@@ -152,17 +155,15 @@ jobs:
         run: |
           LOG_FILE=$(find /home/runner/work -name "*.log" -type f | grep -i unity | head -1)
           if [ -n "$LOG_FILE" ]; then
-            # 로그 앞뒤 250줄씩 잘라서 핵심만 저장
-            head -n 250 "$LOG_FILE" > build_error.log
-            echo "..." >> build_error.log
-            tail -n 250 "$LOG_FILE" >> build_error.log
+            # 에러는 주로 끝에 있으므로 마지막 500줄만 저장
+            tail -n 500 "$LOG_FILE" > build_error.log
             echo "log_saved=true" >> $GITHUB_OUTPUT
           else
             echo "Build failed but log file not accessible" > build_error.log
             echo "log_saved=false" >> $GITHUB_OUTPUT
           fi
 
-      # 7. Gemini API로 로그 분석 (수정됨: 안전한 JSON 처리)
+      # 7. Gemini API로 로그 분석
       - name: Analyze Build Error with Gemini
         if: failure()
         id: analyze_error
@@ -174,14 +175,13 @@ jobs:
             LOG_CONTENT="Log file not found."
           fi
           
-          # jq를 사용하여 JSON 페이로드를 안전하게 생성 (특수문자 자동 처리)
-          # 로그 내용이 길 수 있으므로 jq의 --arg를 사용합니다.
+          # jq를 사용하여 JSON 페이로드를 안전하게 생성
           JSON_PAYLOAD=$(jq -n \
             --arg log "$LOG_CONTENT" \
             '{
               contents: [{
                 parts: [{
-                  text: ("다음은 Unity WebGL 빌드 실패 로그입니다. 원인과 해결방법을 분석해주세요. (한국어로 답변)\n\n" + $log)
+                  text: ("다음은 Unity WebGL 빌드 실패 로그입니다. 이 로그를 분석하여 다음 형식으로 간결하게 답변해주세요:\n\n**원인:**\n(빌드 실패의 주요 원인을 1-2문장으로 설명)\n\n**해결방법:**\n1. (구체적인 해결 방법)\n2. (추가 해결 방법이 있다면)\n\n로그:\n```\n" + $log + "\n```")
                 }]
               }],
               generationConfig: {
@@ -200,10 +200,12 @@ jobs:
           HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
           HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
           
-          if [ "$HTTP_STATUS" != "200" ]; then
+          if [ "$HTTP_STATUS" = "429" ]; then
+            ANALYSIS="⚠️ Gemini API 할당량(Quota) 초과로 자동 분석이 수행되지 않았습니다."
+          elif [ "$HTTP_STATUS" != "200" ]; then
             echo "Gemini API Error: $HTTP_STATUS"
             echo "Response: $HTTP_BODY"
-            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS). 로그가 너무 길거나 API 키를 확인해주세요."
+            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)"
           else
             # 응답 파싱
             ANALYSIS=$(echo "$HTTP_BODY" | jq -r '.candidates[0].content.parts[0].text // "⚠️ 분석 결과 없음"')
@@ -222,7 +224,25 @@ jobs:
           name: build-WebGL
           path: build/WebGL
 
-      # 9. 성공 알림
+      # 9. GitHub Pages 배포 준비
+      - name: Setup Pages
+        if: success()
+        uses: actions/configure-pages@v5
+
+      # 10. Pages용 Artifact 업로드
+      - name: Upload Pages Artifact
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/WebGL/WebGL
+
+      # 11. GitHub Pages 배포
+      - name: Deploy to GitHub Pages
+        if: success()
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # 12. 성공 알림 (GitHub Pages 링크 포함)
       - name: Slack Notification (Success)
         if: success()
         uses: slackapi/slack-github-action@v2.1.1
@@ -237,7 +257,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "✅ *${{ github.repository }}* WebGL 빌드 완료\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '🕐 스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '👆 수동 빌드' || '📤 Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}"
+                    "text": "✅ *${{ github.repository }}* WebGL 빌드 완료\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '수동 빌드' || 'Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}\n🌐 <${{ steps.deployment.outputs.page_url }}|GitHub Pages에서 플레이하기>"
                   }
                 },
                 {
@@ -253,7 +273,7 @@ jobs:
               ]
             }
 
-      # 10. 실패 알림
+      # 13. 실패 알림 (Gemini 분석 포함)
       - name: Slack Notification (Failure)
         if: failure()
         uses: slackapi/slack-github-action@v2.1.1
@@ -268,7 +288,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 *${{ github.repository }}* WebGL 빌드 실패\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '🕐 스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '👆 수동 빌드' || '📤 Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n📝 커밋: ${{ needs.check-changes.outputs.last_commit_message }}\n👤 작성자: ${{ github.actor }}"
+                    "text": "🔥 *${{ github.repository }}* WebGL 빌드 실패\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '수동 빌드' || 'Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n📝 커밋: ${{ needs.check-changes.outputs.last_commit_message }}\n👤 작성자: ${{ github.actor }}"
                   }
                 },
                 {
@@ -310,6 +330,7 @@ jobs:
 
       # 2. Butler로 itch.io 업로드
       - name: Butler Push
+        id: butler_push
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_IO_API }}
@@ -318,7 +339,100 @@ jobs:
           CHANNEL: html5
           PACKAGE: build/WebGL
 
-      # 3. 성공 알림 (배포 완료)
+      # 3. 배포 실패 시 Gemini 분석
+      - name: Analyze Deploy Error with Gemini
+        if: failure()
+        id: analyze_deploy_error
+        run: |
+          PROMPT="itch.io Butler 배포(Deploy)가 실패했습니다. 
+          현재 사용 중인 Action은 'josephbmanley/butler-publish-itchio-action'입니다.
+          
+          다음 형식으로 답변해주세요:
+          
+          **원인:**
+          (배포 실패의 주요 원인)
+          
+          **해결방법:**
+          1. (구체적인 해결 방법)
+          2. (추가 해결 방법)
+          3. (추가 해결 방법)"
+
+          JSON_PAYLOAD=$(jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              contents: [{
+                parts: [{
+                  text: $prompt
+                }]
+              }],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 800
+              }
+            }')
+
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
+            -H 'Content-Type: application/json' \
+            -d "$JSON_PAYLOAD")
+
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+
+          if [ "$HTTP_STATUS" = "429" ]; then
+            ANALYSIS="⚠️ Gemini API 할당량 초과"
+          elif [ "$HTTP_STATUS" != "200" ]; then
+            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)"
+          else
+            ANALYSIS=$(echo "$HTTP_BODY" | jq -r '.candidates[0].content.parts[0].text // "분석 실패"')
+          fi
+          
+          echo "analysis<<EOF" >> $GITHUB_OUTPUT
+          echo "$ANALYSIS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # 4. 배포 실패 알림 (Gemini 분석 포함)
+      - name: Slack Notification (Deploy Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ itch.io 배포 실패",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚀 *${{ github.repository }}* itch.io 배포 실패\nitch.io 업로드 중 오류가 발생했습니다."
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🤖 *AI 분석 결과*\n${{ steps.analyze_deploy_error.outputs.analysis }}"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|상세 로그 확인>"
+                  }
+                }
+              ]
+            }
+
+      # 5. 배포 성공 알림 (itch.io 링크 포함)
       - name: Slack Notification (Deploy Success)
         if: success()
         uses: slackapi/slack-github-action@v2.1.1
@@ -333,13 +447,13 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🎉 *itch.io 배포 성공*\n🌐 <https://skkupsh.itch.io/card-factory|플레이하기>\n🌿 브랜치: `${{ github.ref_name }}`"
+                    "text": "🎉 *${{ github.repository }}* itch.io 배포 성공\n🌐 <https://skkupsh.itch.io/card-factory|itch.io에서 플레이하기>\n🌿 브랜치: `${{ github.ref_name }}`"
                   }
                 }
               ]
             }
 
-      # 4. Artifact 정리
+      # 6. Artifact 정리
       - name: Cleanup Artifacts
         if: always()
         uses: geekyeggo/delete-artifact@v1
@@ -365,7 +479,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "ℹ️ *${{ github.repository }}* 스케줄 빌드 스킵\n📅 지난 24시간 동안 web_build 브랜치에 변경사항이 없습니다."
+                    "text": "ℹ️ *${{ github.repository }}* 스케줄 빌드 스킵\n📅 지난 24시간 동안 main 브랜치에 변경사항이 없습니다."
                   }
                 }
               ]
