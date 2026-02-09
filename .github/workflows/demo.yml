@@ -1,8 +1,8 @@
-name: Unity WebGL Build & Deploy
+name: Unity WebGL Build & Deploy to itch.io
 
 on:
   push:
-    branches: [ web_build ]
+    branches: [ main ]
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
@@ -12,129 +12,49 @@ permissions:
 
 jobs:
   check-changes:
-    name: Check for Changes
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
       last_commit_message: ${{ steps.check.outputs.last_commit_message }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Check if build is needed
-        id: check
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - id: check
         run: |
-          # Push 이벤트면 항상 빌드
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [[ "${{ github.event_name }}" != "schedule" ]]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
             echo "last_commit_message=${{ github.event.head_commit.message }}" >> $GITHUB_OUTPUT
-            echo "✅ Push event - build triggered"
             exit 0
           fi
-          
-          # 수동 실행이면 항상 빌드
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+
+          git fetch origin main
+          git checkout main
+          COMMITS=$(git log --since="24 hours ago" --oneline | wc -l)
+
+          if [ "$COMMITS" -gt 0 ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
-            echo "last_commit_message=Manual build triggered" >> $GITHUB_OUTPUT
-            echo "✅ Manual trigger - build triggered"
-            exit 0
-          fi
-          
-          # 스케줄 실행인 경우 - web_build 브랜치 체크
-          git fetch origin web_build
-          git checkout web_build
-          
-          # 지난 24시간 이내 커밋이 있는지 확인
-          COMMITS_LAST_24H=$(git log --since="24 hours ago" --oneline | wc -l)
-          LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
-          
-          if [ $COMMITS_LAST_24H -gt 0 ]; then
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            echo "last_commit_message=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
-            echo "✅ Found $COMMITS_LAST_24H commits in last 24 hours - build triggered"
+            echo "last_commit_message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
           else
             echo "should_build=false" >> $GITHUB_OUTPUT
             echo "last_commit_message=No changes" >> $GITHUB_OUTPUT
-            echo "ℹ️ No commits in last 24 hours - build skipped"
           fi
-
   build:
-    name: Build WebGL
-    runs-on: ubuntu-latest
     needs: check-changes
     if: needs.check-changes.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
 
     steps:
-      # 0. 디스크 공간 확보
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      # 1. 코드 체크아웃
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # 2. 이전 빌드 성공 커밋 찾기
-      - name: Get Previous Successful Build Commit
-        id: previous_commit
-        run: |
-          PREVIOUS_COMMIT=$(git log --pretty=format:"%H" --skip=1 -n 20 | while read commit; do
-            STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/commits/${commit}/status" | \
-              jq -r '.state')
-            
-            if [ "$STATUS" = "success" ]; then
-              echo "$commit"
-              break
-            fi
-          done)
-          
-          if [ -z "$PREVIOUS_COMMIT" ]; then
-            PREVIOUS_COMMIT=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
-          fi
-          
-          echo "previous_sha=$PREVIOUS_COMMIT" >> $GITHUB_OUTPUT
-
-      # 3. 커밋 내역 생성
-      - name: Generate Commit History
-        id: commits
-        run: |
-          PREVIOUS_SHA="${{ steps.previous_commit.outputs.previous_sha }}"
-          CURRENT_SHA="${{ github.sha }}"
-          
-          COMMITS=$(git log --pretty=format:"• %s (%an)" ${PREVIOUS_SHA}..${CURRENT_SHA} | head -n 10)
-          
-          echo "commit_list<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          COMMIT_COUNT=$(git rev-list --count ${PREVIOUS_SHA}..${CURRENT_SHA})
-          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
-
-      # 4. Library 캐시
-      - name: Cache Library
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-WebGL-
-            Library-
+          key: Library-WebGL-${{ hashFiles('Assets/**','Packages/**','ProjectSettings/**') }}
 
-      # 5. Unity WebGL 빌드
-      - name: Build WebGL
-        id: unity_build
+      - id: unity
         continue-on-error: true
         uses: game-ci/unity-builder@v4
         env:
@@ -143,240 +63,104 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-          buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
 
-      # 6. 빌드 로그 저장 (실패 시)
       - name: Save Build Log
         if: failure()
-        id: save_log
         run: |
-          LOG_FILE=$(find /home/runner/work -name "*.log" -type f | grep -i unity | head -1)
-          if [ -n "$LOG_FILE" ]; then
-            tail -n 500 "$LOG_FILE" > build_error.log
-            echo "log_saved=true" >> $GITHUB_OUTPUT
-          else
-            echo "Build failed but log file not accessible" > build_error.log
-            echo "log_saved=false" >> $GITHUB_OUTPUT
-          fi
+          find . -name "*.log" | head -1 | xargs tail -n 400 > build_error.log
 
-      # 7. Gemini API로 로그 분석 (Quota / 오류 대응 포함)
       - name: Analyze Build Error with Gemini
         if: failure()
-        id: analyze_error
+        id: gemini
         run: |
-          # 1. 빌드 로그 읽기
-          if [ -f "build_error.log" ]; then
-            BUILD_LOG=$(cat build_error.log)
-          else
-            BUILD_LOG="Build log not available"
-          fi
+          LOG=$(cat build_error.log)
 
-          # 2. Gemini 프롬프트 구성
-          PROMPT="다음은 Unity WebGL 빌드 실패 로그입니다. 이 로그를 분석하여 다음 형식으로 간결하게 답변해주세요:
+          PROMPT="Unity WebGL 빌드 실패 로그입니다.
 
           **원인:**
-          (빌드 실패의 주요 원인을 1-2문장으로 설명)
-
           **해결방법:**
-          1. (구체적인 해결 방법)
-          2. (추가 해결 방법이 있다면)
 
           로그:
-          \`\`\`
-          ${BUILD_LOG}
-          \`\`\`"
+          ```
+          ${LOG}
+          ```"
 
-          JSON_PAYLOAD=$(jq -n \
-            --arg prompt "$PROMPT" \
-            '{
-              contents: [{
-                parts: [{
-                  text: $prompt
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1024
-              }
-            }')
+          JSON=$(jq -n --arg p "$PROMPT" '{contents:[{parts:[{text:$p}]}]}')
 
-          # 3. HTTP Status Code 포함하여 Gemini API 호출
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
-            -H 'Content-Type: application/json' \
-            -d "$JSON_PAYLOAD")
+          RES=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
+            -H "Content-Type: application/json" -d "$JSON")
 
-          BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
-          STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+          BODY=$(echo "$RES" | sed '$d')
+          CODE=$(echo "$RES" | tail -n 1)
 
-          # 4. 상태 코드별 분기 처리
-          if [ "$STATUS" = "429" ]; then
-            ANALYSIS="⚠️ Gemini API 할당량(Quota) 초과로 자동 분석이 수행되지 않았습니다."
-          elif [ "$STATUS" != "200" ]; then
-            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP Status: $STATUS)"
+          if [ "$CODE" != "200" ]; then
+            OUT="Gemini 분석 실패 (HTTP $CODE)"
           else
-            ANALYSIS=$(echo "$BODY" | jq -r \
-              '.candidates[0].content.parts[0].text // "⚠️ Gemini 응답 파싱 실패"')
+            OUT=$(echo "$BODY" | jq -r '.candidates[0].content.parts[0].text')
           fi
 
-          # 5. Output으로 전달 (Slack에서 사용)
           echo "analysis<<EOF" >> $GITHUB_OUTPUT
-          echo "$ANALYSIS" >> $GITHUB_OUTPUT
+          echo "$OUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # 8. 빌드 결과물 업로드 (성공 시)
-      - name: Upload Build Artifact
+      - uses: actions/upload-artifact@v4
         if: success()
-        uses: actions/upload-artifact@v4
         with:
-          name: build-WebGL
+          name: webgl-build
+          path: build/WebGL
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: needs.build.result == 'success'
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: webgl-build
           path: build/WebGL
 
-      # 9. 성공 알림
-      - name: Slack Notification (Success)
-        if: success()
-        uses: slackapi/slack-github-action@v2.1.1
+      - name: Butler Push
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_IO_API }}
+          ITCH_USER: skkupsh
+          ITCH_GAME: card-factory
+          CHANNEL: html5
+          PACKAGE: build/WebGL
+
+      - name: Slack Success
+        uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
           payload: |
             {
-              "text": "✅ WebGL 빌드 성공",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "✅ *${{ github.repository }}* WebGL 빌드 완료\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '🕐 스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '👆 수동 빌드' || '📤 Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}"
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "📝 *변경사항* (${{ steps.commits.outputs.commit_count }}개 커밋)\n${{ steps.commits.outputs.commit_list }}"
-                  }
+              "text": "🎮 WebGL 빌드 & itch.io 배포 성공",
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*빌드 & 배포 완료*\n• 브랜치: main\n• 커밋: ${{ github.sha }}"
                 }
-              ]
+              }]
             }
-
-      # 10. 실패 알림
-      - name: Slack Notification (Failure)
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
+  notify-failure:
+    needs: build
+    if: needs.build.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Failure
+        uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
           payload: |
             {
               "text": "❌ WebGL 빌드 실패",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🔥 *${{ github.repository }}* WebGL 빌드 실패\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '🕐 스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '👆 수동 빌드' || '📤 Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n📝 커밋: ${{ needs.check-changes.outputs.last_commit_message }}\n👤 작성자: ${{ github.actor }}"
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🤖 *AI 분석 결과*\n${{ steps.analyze_error.outputs.analysis }}"
-                  }
-                },
-                {
-                  "type": "divider"
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🔗 <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|상세 로그 확인>"
-                  }
+              "blocks": [{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Gemini 분석 결과*\n${{ needs.build.outputs.analysis }}"
                 }
-              ]
-            }
-
-  deploy:
-    name: Butler Push to itch.io
-    runs-on: ubuntu-latest
-    needs: [check-changes, build]
-    if: needs.check-changes.outputs.should_build == 'true' && needs.build.result == 'success'
-
-    steps:
-      # 1. 빌드 Artifact 다운로드
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-WebGL
-          path: build/WebGL
-
-      # 2. Butler로 itch.io 업로드
-      - name: Butler Push
-        uses: itchio/butler-action@v1
-        with:
-          api-key: ${{ secrets.ITCH_IO_API }}
-          user: skkupsh
-          game: card-factory
-          channel: html5
-          directory: build/WebGL
-
-      # 3. 성공 알림 (배포 완료)
-      - name: Slack Notification (Deploy Success)
-        if: success()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": "🎮 itch.io 배포 완료",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🎉 *itch.io 배포 성공*\n🌐 <https://skkupsh.itch.io/card-factory|플레이하기>\n🌿 브랜치: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
-
-      # 4. Artifact 정리
-      - name: Cleanup Artifacts
-        if: always()
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: build-WebGL
-
-  notify-skip:
-    name: Notify Build Skipped
-    runs-on: ubuntu-latest
-    needs: check-changes
-    if: needs.check-changes.outputs.should_build == 'false'
-    steps:
-      - name: Slack Notification (Skipped)
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": "ℹ️ 스케줄 빌드 스킵",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "ℹ️ *${{ github.repository }}* 스케줄 빌드 스킵\n📅 지난 24시간 동안 web_build 브랜치에 변경사항이 없습니다."
-                  }
-                }
-              ]
+              }]
             }
