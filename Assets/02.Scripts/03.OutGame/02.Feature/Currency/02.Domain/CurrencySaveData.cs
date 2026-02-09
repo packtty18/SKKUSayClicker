@@ -1,9 +1,13 @@
+using Firebase.Firestore;
 using System;
 
 [Serializable]
+[FirestoreData]
 public class CurrencySaveData
 {
+    [FirestoreProperty]
     public float[] Currencies { get; private set; }
+    [FirestoreProperty]
     public long LastSavedAt { get; private set; }
 
     public CurrencySaveData() { }
@@ -19,7 +23,7 @@ public class CurrencySaveData
     {
         return new CurrencySaveData(
             new float[(int)ECurrencyType.Count],
-            DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            0
         );
     }
 

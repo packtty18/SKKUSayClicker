@@ -39,7 +39,7 @@ public class CurrencyManager : GlobalSingleton<CurrencyManager>
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"[CurrencyManager] 서버 로드 실패함: {e.Message}");
+            Debug.LogWarning($"[CurrencyManager] 재화 로드 실패함: {e.Message}");
         }
     }
 

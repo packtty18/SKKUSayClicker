@@ -37,8 +37,8 @@ public class HybridUpgradeRepository : IUpgradeRepository
 
         Debug.Log(
             $"[HybridUpgradeRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
-            $"ServerTime: {server.LastSavedAt:O}, " +
-            $"LocalTime: {local.LastSavedAt:O}"
+            $"ServerTime: {server.LastSavedAt}, " +
+            $"LocalTime: {local.LastSavedAt}"
         );
 
         return isServerLatest ? server : local;

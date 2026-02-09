@@ -12,12 +12,6 @@ public class UpgradeSaveData
 
     public UpgradeSaveData() { }
 
-    public UpgradeSaveData(UpgradeSaveData data)
-    {
-        Levels = data.Levels;
-        LastSavedAt = data.LastSavedAt;
-    }
-
     //로드용도
     public UpgradeSaveData(int[] levels, long lastSavedAt)
     {
@@ -28,8 +22,7 @@ public class UpgradeSaveData
     //세이브 용도 , 초기 상태 생성하기
     public static UpgradeSaveData CreateDefault()
     {
-        return new UpgradeSaveData(new int[(int)EUpgradeType.Count],
-            DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        return new UpgradeSaveData(new int[(int)EUpgradeType.Count],0);
     }
 
     //현재 저장된 데이터를 세이브 데이터로 바꾸기

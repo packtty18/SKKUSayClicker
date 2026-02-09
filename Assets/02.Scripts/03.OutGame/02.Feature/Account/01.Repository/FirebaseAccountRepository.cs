@@ -60,8 +60,8 @@ public class FirebaseAccountRepository : IAccountRepository
 
             UpgradeSaveData upgrade = UpgradeSaveData.CreateDefault();
             batch.Set(
-                _db.Collection("Upgrade").Document(uid),
-                new UpgradeSaveData(upgrade)
+                _db.Collection("Upgrade").Document(uid), 
+                upgrade
             );
             await batch.CommitAsync();
 

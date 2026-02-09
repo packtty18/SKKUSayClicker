@@ -46,7 +46,7 @@ public class UpgradeManager : GlobalSingleton<UpgradeManager>
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"[UpgradeManager] 로컬 로드 실패함: {e.Message}");
+            Debug.LogWarning($"[UpgradeManager] 업그레이드 로드 실패함: {e.Message}");
         }
     }
 
