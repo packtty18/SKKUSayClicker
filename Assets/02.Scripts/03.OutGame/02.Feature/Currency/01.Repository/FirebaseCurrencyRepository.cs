@@ -1,11 +1,10 @@
-using Cysharp.Threading.Tasks;
-using Firebase.Auth;
-using Firebase.Firestore;
 using System;
-using System.Threading.Tasks;
-using UnityEditor.Overlays;
 using UnityEngine;
 
+#if !UNITY_WEBGL || UNITY_EDITOR
+using Firebase.Firestore;
+using Cysharp.Threading.Tasks;
+using Firebase.Auth;
 public class FirebaseCurrencyRepository : ICurrencyRepository
 {
     private const string DOMAIN = "Currency";
@@ -51,3 +50,4 @@ public class FirebaseCurrencyRepository : ICurrencyRepository
         }
     }
 }
+#endif

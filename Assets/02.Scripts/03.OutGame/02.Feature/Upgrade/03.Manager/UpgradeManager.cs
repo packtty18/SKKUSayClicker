@@ -22,7 +22,11 @@ public class UpgradeManager : GlobalSingleton<UpgradeManager>
 
     protected override void Init()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         _repository = new HybridUpgradeRepository();
+#else
+         _repository = new PlayerPrefsUpgradeRepository(AccountManager.Instance.Email);
+#endif
         Load().Forget();
     }
 

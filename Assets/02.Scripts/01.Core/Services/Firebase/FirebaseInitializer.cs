@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 
+#if !UNITY_WEBGL || UNITY_EDITOR
 public class FirebaseInitializer : GlobalSingleton<FirebaseInitializer>
 {
     protected override void Init()
@@ -9,3 +9,4 @@ public class FirebaseInitializer : GlobalSingleton<FirebaseInitializer>
     }
 
 }
+#endif

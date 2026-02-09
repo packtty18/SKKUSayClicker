@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "UpgradeSpecTableSO", menuName = "SO/UpgradeSpecTableSO")]

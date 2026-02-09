@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
@@ -36,8 +37,8 @@ public class HybridUpgradeRepository : IUpgradeRepository
 
         Debug.Log(
             $"[HybridUpgradeRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
-            $"ServerTime: {server.LastSavedAt.ToDateTime():O}, " +
-            $"LocalTime: {local.LastSavedAt.ToDateTime():O}"
+            $"ServerTime: {server.LastSavedAt:O}, " +
+            $"LocalTime: {local.LastSavedAt:O}"
         );
 
         return isServerLatest ? server : local;
@@ -92,3 +93,4 @@ public class HybridUpgradeRepository : IUpgradeRepository
         }
     }
 }
+#endif

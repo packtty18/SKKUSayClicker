@@ -1,5 +1,5 @@
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Cysharp.Threading.Tasks;
-using Firebase.Firestore;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -32,8 +32,8 @@ public class HybridCurrencyRepository : ICurrencyRepository
 
         Debug.Log(
             $"[HybridCurrencyRepository] {(isServerLatest ? "서버" : "로컬")} 선택. " +
-            $"ServerTime: {server.LastSavedAt.ToDateTime():O}, " +
-            $"LocalTime: {local.LastSavedAt.ToDateTime():O}"
+            $"ServerTime: {server.LastSavedAt:O}, " +
+            $"LocalTime: {local.LastSavedAt:O}"
         );
 
         return isServerLatest ? server : local;
@@ -93,3 +93,4 @@ public class HybridCurrencyRepository : ICurrencyRepository
         }
     }
 }
+#endif

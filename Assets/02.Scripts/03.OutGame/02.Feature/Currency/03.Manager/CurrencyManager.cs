@@ -1,31 +1,32 @@
 using Cysharp.Threading.Tasks;
-using Firebase.Firestore;
-using Sirenix.OdinInspector;
 using System;
-using System.Threading;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 
 public class CurrencyManager : GlobalSingleton<CurrencyManager>
 {
     public static SafeEvent<ECurrencyType> OnDataChanged = new();
 
     private Currency[] _currencies = new Currency[(int)ECurrencyType.Count];
-    private ICurrencyRepository _hybridRepository;
+    private ICurrencyRepository _repository;
 
     public Currency Money => Get(ECurrencyType.Money);
     public Currency Prestigy => Get(ECurrencyType.Prestigy);
 
     protected override void Init()
     {
-        _hybridRepository = new HybridCurrencyRepository();
+#if !UNITY_WEBGL || UNITY_EDITOR
+        _repository = new HybridCurrencyRepository();
+#else
+         _repository = new PlayerPrefsCurrencyRepository(AccountManager.Instance.Email);
+#endif
+
         Load().Forget();
     }
     public void Save()
     {
         CurrencySaveData saveData = CurrencySaveData.FromRuntime(_currencies);
         //하이브리드 리포지토리로 저장 위임
-        _hybridRepository.Save(saveData).Forget();
+        _repository.Save(saveData).Forget();
     }
 
     private async UniTask Load()
@@ -33,7 +34,7 @@ public class CurrencyManager : GlobalSingleton<CurrencyManager>
         try
         {
             CurrencySaveData result;
-            result = await _hybridRepository.Load();
+            result = await _repository.Load();
             ApplyData(result);
         }
         catch (Exception e)

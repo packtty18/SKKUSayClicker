@@ -1,4 +1,6 @@
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Cysharp.Threading.Tasks;
+
 using Firebase;
 using Firebase.Auth;
 using Firebase.Firestore;
@@ -77,3 +79,4 @@ public static class FirebaseService
         Debug.Log("[Firebase] Shutdown");
     }
 }
+#endif

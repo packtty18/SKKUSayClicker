@@ -1,7 +1,5 @@
 using Firebase.Firestore;
 using System;
-using UnityEditor.Rendering.Universal;
-
 
 [Serializable]
 [FirestoreData]
@@ -10,7 +8,7 @@ public class UpgradeSaveData
     [FirestoreProperty]
     public int[] Levels { get; private set; }
     [FirestoreProperty]
-    public Timestamp LastSavedAt { get; private set; }
+    public long LastSavedAt { get; private set; }
 
     public UpgradeSaveData() { }
 
@@ -21,7 +19,7 @@ public class UpgradeSaveData
     }
 
     //로드용도
-    public UpgradeSaveData(int[] levels, Timestamp lastSavedAt)
+    public UpgradeSaveData(int[] levels, long lastSavedAt)
     {
         Levels = levels;
         LastSavedAt = lastSavedAt;
@@ -31,7 +29,7 @@ public class UpgradeSaveData
     public static UpgradeSaveData CreateDefault()
     {
         return new UpgradeSaveData(new int[(int)EUpgradeType.Count],
-            Timestamp.FromDateTime(DateTime.UtcNow));
+            DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     }
 
     //현재 저장된 데이터를 세이브 데이터로 바꾸기
@@ -45,7 +43,7 @@ public class UpgradeSaveData
 
         return new UpgradeSaveData(
             target,
-            Timestamp.FromDateTime(DateTime.UtcNow)
+             DateTimeOffset.UtcNow.ToUnixTimeSeconds()
         );
     }
 }

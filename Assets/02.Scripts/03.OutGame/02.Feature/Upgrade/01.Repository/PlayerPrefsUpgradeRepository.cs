@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using Firebase.Firestore;
-using MoreMountains.Tools;
 using System;
 using UnityEngine;
 
@@ -27,11 +26,7 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
             );
         }
 
-        //TimeStamp => DateTime => UTC 정규화 => long 형식으로 바꾸기 => tostring
-        long convertedTime = saveData.LastSavedAt.ToDateTime().ToUniversalTime().Ticks;
-
-
-        UserScopedPlayerPrefs.SetString(_userId, DOMAIN, LAST_SAVED_AT_KEY, convertedTime.ToString());
+        UserScopedPlayerPrefs.SetString(_userId, DOMAIN, LAST_SAVED_AT_KEY, saveData.LastSavedAt.ToString());
 
         return UniTask.CompletedTask;
     }
@@ -50,21 +45,16 @@ public class PlayerPrefsUpgradeRepository : IUpgradeRepository
             }
         }
 
-        Timestamp timestamp = Timestamp.FromDateTime(DateTime.MinValue);
+        long lastSavedAt = 0;
         if (PlayerPrefs.HasKey(PlayerPrefsKeyBuilder.GameData(_userId, DOMAIN, LAST_SAVED_AT_KEY)))
         {
             string savedLastTime = UserScopedPlayerPrefs.GetString(_userId, DOMAIN, LAST_SAVED_AT_KEY, "0");
 
-            //시간을 string => long => dataTime => timestamp
-            if (long.TryParse(savedLastTime, out long ticks))
-            {
-                DateTime utcTime = new DateTime(ticks, DateTimeKind.Utc);
-                timestamp = Timestamp.FromDateTime(utcTime);
-            }
+            if (long.TryParse(savedLastTime, out long unix))
+                lastSavedAt = unix;
 
         }
-
-        UpgradeSaveData data = new UpgradeSaveData(levels, timestamp);
+        UpgradeSaveData data = new UpgradeSaveData(levels, lastSavedAt);
         return UniTask.FromResult(data);
     }
 }

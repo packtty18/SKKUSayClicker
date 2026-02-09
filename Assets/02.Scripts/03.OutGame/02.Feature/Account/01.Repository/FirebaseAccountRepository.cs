@@ -1,10 +1,10 @@
-using Cysharp.Threading.Tasks;
-using Firebase;
-using Firebase.Auth;
-using Firebase.Firestore;
 using System;
 using UnityEngine;
 
+#if !UNITY_WEBGL || UNITY_EDITOR
+using Firebase.Firestore;
+using Cysharp.Threading.Tasks;
+using Firebase.Auth;
 public class FirebaseAccountRepository : IAccountRepository
 {
     private const string DOMAIN = "Account";
@@ -81,3 +81,5 @@ public class FirebaseAccountRepository : IAccountRepository
         _auth.SignOut();
     }
 }
+
+#endif

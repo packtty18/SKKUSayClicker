@@ -1,9 +1,10 @@
+using System;
+using UnityEngine;
+
+#if !UNITY_WEBGL || UNITY_EDITOR
+using Firebase.Firestore;
 using Cysharp.Threading.Tasks;
 using Firebase.Auth;
-using Firebase.Firestore;
-using System;
-using UnityEditor.Overlays;
-using UnityEngine;
 
 public class FirebaseUpgradeRepository : IUpgradeRepository
 {
@@ -49,3 +50,5 @@ public class FirebaseUpgradeRepository : IUpgradeRepository
         }
     }
 }
+
+#endif

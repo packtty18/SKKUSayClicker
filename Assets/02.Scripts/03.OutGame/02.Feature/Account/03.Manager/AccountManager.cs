@@ -20,8 +20,11 @@ public class AccountManager : GlobalSingleton<AccountManager>
 
     protected override void Init()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         _repository = new FirebaseAccountRepository();
-
+#else
+         _repository =  new PlayerPrefsAccountRepository();
+#endif
         _loginValidator = new LoginValidator();
         _registerValidator = new RegisterValidator();
     }
