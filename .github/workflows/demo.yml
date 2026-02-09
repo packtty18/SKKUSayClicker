@@ -320,13 +320,13 @@ jobs:
 
       # 2. Butler로 itch.io 업로드
       - name: Butler Push
-        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_IO_API }}
-          ITCH_USER: skkupsh
-          ITCH_GAME: card-factory
-          CHANNEL: html5
-          PACKAGE: build/WebGL
+        uses: itchio/butler-action@v1
+        with:
+          api-key: ${{ secrets.ITCH_IO_API }}
+          user: skkupsh
+          game: card-factory
+          channel: html5
+          directory: build/WebGL
 
       # 3. 성공 알림 (배포 완료)
       - name: Slack Notification (Deploy Success)
