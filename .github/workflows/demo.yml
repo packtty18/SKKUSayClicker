@@ -1,0 +1,18 @@
+# 작업 지시서의 이름
+name : Unity WebGL Build
+
+# 언제 실행? (트리거 혹은 이벤트)
+on: #실행해라
+  push : #푸쉬되었을때
+    branch : [ main ] #메인브랜치에
+
+# 무엇을 실행? (작업의 목록)
+job : #실행해라
+  build : #빌드를
+	runs-on : ubuntu-latest #우분투 최신환경에서
+
+  steps: # ~~을
+	- name : 코드 가져오기
+	uses : actions/checkout@v4 # 코드 가져오기 기능
+	- name : 유니티 필드
+	run : echo "유니티를 빌드합니다." #메시지를 보내는 기능
