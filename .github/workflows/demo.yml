@@ -2,7 +2,7 @@ name: Unity Build
 
 on:
   push:
-    branches: [ web-build ]
+    branches: [ web_build ]
 
 jobs:
   build:
