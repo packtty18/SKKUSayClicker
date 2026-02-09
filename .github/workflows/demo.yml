@@ -190,9 +190,9 @@ jobs:
               }
             }')
           
-          # API 호출 (HTTP 상태 코드 캡처)
+          # API 호출 (v1 엔드포인트 사용)
           HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
             -H 'Content-Type: application/json' \
             -d "$JSON_PAYLOAD")
           
@@ -200,11 +200,19 @@ jobs:
           HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
           HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
           
+          # 디버깅 정보 출력
+          echo "HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Error Response: $HTTP_BODY"
+          fi
+          
           if [ "$HTTP_STATUS" = "429" ]; then
             ANALYSIS="⚠️ Gemini API 할당량(Quota) 초과로 자동 분석이 수행되지 않았습니다."
+          elif [ "$HTTP_STATUS" = "404" ]; then
+            ANALYSIS="⚠️ Gemini API 엔드포인트 오류 (404). API 키 또는 모델명을 확인해주세요."
+          elif [ "$HTTP_STATUS" = "403" ]; then
+            ANALYSIS="⚠️ Gemini API 키가 유효하지 않거나 권한이 없습니다."
           elif [ "$HTTP_STATUS" != "200" ]; then
-            echo "Gemini API Error: $HTTP_STATUS"
-            echo "Response: $HTTP_BODY"
             ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)"
           else
             # 응답 파싱
@@ -328,16 +336,23 @@ jobs:
           name: build-WebGL
           path: build/WebGL
 
-      # 2. Butler로 itch.io 업로드
-      - name: Butler Push
-        id: butler_push
-        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+      # 2. Butler 직접 설치 및 업로드
+      - name: Install and Setup Butler
+        run: |
+          # Butler 다운로드 (대체 도메인 사용)
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+          sudo mv butler /usr/local/bin/
+          
+          # Butler 버전 확인
+          butler -V
+
+      - name: Push to itch.io with Butler
         env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_IO_API }}
-          ITCH_USER: skkupsh
-          ITCH_GAME: card-factory
-          CHANNEL: html5
-          PACKAGE: build/WebGL
+          BUTLER_API_KEY: ${{ secrets.ITCH_IO_API }}
+        run: |
+          butler push build/WebGL skkupsh/card-factory:html5
 
       # 3. 배포 실패 시 Gemini 분석
       - name: Analyze Deploy Error with Gemini
@@ -345,7 +360,7 @@ jobs:
         id: analyze_deploy_error
         run: |
           PROMPT="itch.io Butler 배포(Deploy)가 실패했습니다. 
-          현재 사용 중인 Action은 'josephbmanley/butler-publish-itchio-action'입니다.
+          Butler CLI를 직접 설치하여 사용하는 방식입니다.
           
           다음 형식으로 답변해주세요:
           
@@ -371,16 +386,27 @@ jobs:
               }
             }')
 
+          # API 호출 (v1 엔드포인트 사용)
           HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
             -H 'Content-Type: application/json' \
             -d "$JSON_PAYLOAD")
 
           HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
           HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
 
+          # 디버깅 정보 출력
+          echo "HTTP Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "Error Response: $HTTP_BODY"
+          fi
+
           if [ "$HTTP_STATUS" = "429" ]; then
             ANALYSIS="⚠️ Gemini API 할당량 초과"
+          elif [ "$HTTP_STATUS" = "404" ]; then
+            ANALYSIS="⚠️ Gemini API 엔드포인트 오류 (404). API 키를 확인해주세요."
+          elif [ "$HTTP_STATUS" = "403" ]; then
+            ANALYSIS="⚠️ Gemini API 키가 유효하지 않습니다."
           elif [ "$HTTP_STATUS" != "200" ]; then
             ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)"
           else
