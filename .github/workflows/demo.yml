@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   check-changes:
-    name: Check for Changes  #커밋이 있었는지 체크함
+    name: Check for Changes
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
@@ -28,14 +28,12 @@ jobs:
       - name: Check if build is needed
         id: check
         run: |
-          # Push 또는 수동 실행이면 무조건 빌드
           if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
             echo "last_commit_message=${{ github.event.head_commit.message || 'Manual build' }}" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # 스케줄 실행인 경우 변경사항 체크
           git fetch origin main
           git checkout main
           COMMITS_LAST_24H=$(git log --since="24 hours ago" --oneline | wc -l)
@@ -56,7 +54,6 @@ jobs:
     if: needs.check-changes.outputs.should_build == 'true'
 
     steps:
-      # 0. 디스크 공간 확보
       - name: Free Disk Space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -68,14 +65,12 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      # 1. 코드 체크아웃
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'schedule' && 'main' || github.ref }}
           fetch-depth: 0
 
-      # 2. 이전 빌드 커밋 확인 (변경 사항 로그용)
       - name: Get Previous Successful Build Commit
         id: previous_commit
         run: |
@@ -93,7 +88,6 @@ jobs:
           fi
           echo "previous_sha=$PREVIOUS_COMMIT" >> $GITHUB_OUTPUT
 
-      # 3. 커밋 로그 생성
       - name: Generate Commit History
         id: commits
         run: |
@@ -108,7 +102,6 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count ${PREVIOUS_SHA}..${CURRENT_SHA})
           echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
 
-      # 4. Library 캐시
       - name: Cache Library
         uses: actions/cache@v4
         with:
@@ -118,7 +111,6 @@ jobs:
             Library-WebGL-
             Library-
 
-      # 5. Unity WebGL 빌드
       - name: Build WebGL
         id: unity_build
         continue-on-error: true
@@ -131,31 +123,27 @@ jobs:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
 
-      # 6. 빌드 로그 파일 저장 (실패 시에만 수행)
       - name: Save Build Log
         if: failure()
         run: |
           LOG_FILE=$(find /home/runner/work -name "*.log" -type f | grep -i unity | head -1)
           if [ -n "$LOG_FILE" ]; then
-            # Gemini에게 보낼 로그가 너무 길지 않도록 마지막 20,000자만 추출
             tail -c 20000 "$LOG_FILE" > build_error.log
           else
             echo "Build failed but log file not accessible" > build_error.log
           fi
 
-      # 7-1. Node.js 설정 (Gemini SDK 사용 위함)
       - name: Set up Node for Analysis
         if: failure()
         uses: actions/setup-node@v4
         with: 
           node-version: '20'
 
-      # 7-2. Gemini 라이브러리 설치
       - name: Install GoogleGenerativeAI
         if: failure()
         run: npm install @google/generative-ai
 
-      # 7-3. Gemini API로 로그 분석 (JavaScript 실행)
+      # --- [수정됨] 빌드 에러 분석 및 파일 저장 ---
       - name: Analyze Build Error with Gemini
         if: failure()
         id: analyze_error
@@ -167,27 +155,18 @@ jobs:
             const fs = require("fs");
             const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-            // 로그 파일 읽기
             let logContent = "Log file not found.";
-            if (fs.existsSync("build_error.log")) {
+            if (fs.existsSync("build_error.log")) 
+            {
               logContent = fs.readFileSync("build_error.log", "utf8");
             }
 
-            // Gemini 설정
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model:"gemini-1.5-flash" });
 
             const prompt = `
             다음은 Unity WebGL 빌드 실패 로그의 마지막 부분입니다. 
-            이 로그를 분석하여 한국어로 다음 형식에 맞춰 간결하게 답변해주세요:
-
-            **원인:**
-            (빌드 실패의 주요 원인을 1-2문장으로 설명)
-
-            **해결방법:**
-            1. (구체적인 해결 방법)
-            2. (추가 해결 방법이 있다면)
-
+            한국어로 **원인**과 **해결방법**을 요약해 주세요.
             로그:
             \`\`\`
             ${logContent}
@@ -195,20 +174,40 @@ jobs:
             `;
 
             try {
+              console.log("🚀 Requesting Gemini API...");
               const result = await model.generateContent(prompt);
               const response = await result.response;
               const text = response.text();
-              console.log("Gemini Analysis Result:\n" + text);
-              // Slack 알림 단계에서 사용할 수 있도록 output 설정
+              
+              // 1. 응답 검증 로그
+              if (text && text.length > 0) {
+                console.log(`✅ Gemini Response Received (${text.length} chars)`);
+              } else {
+                console.warn("⚠️ Gemini Response is empty!");
+              }
 
+              // 2. 결과를 txt 파일로 저장 (아티팩트용)
+              fs.writeFileSync("gemini_build_analysis.txt", text);
+              console.log("💾 Saved analysis to gemini_build_analysis.txt");
+
+              // 3. Slack용 JSON 처리
               const safeText = JSON.stringify(text).slice(1, -1);
               core.setOutput("analysis", safeText);
+
             } catch (error) {
-              console.error("Gemini API Error:", error);
-              core.setOutput("analysis", "⚠️ Gemini 분석 중 오류가 발생했습니다:" + error.message);
+              console.error("❌ Gemini API Error:", error);
+              fs.writeFileSync("gemini_build_analysis.txt", "Error analyzing log:" + error.message);
+              core.setOutput("analysis", "⚠️ 분석 중 오류 발생:" + error.message);
             }
 
-      # 8. 빌드 결과물 업로드 (성공 시)
+      # --- [추가됨] 빌드 분석 결과 아티팩트 업로드 ---
+      - name: Upload Gemini Analysis Artifact (Build)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemini-build-analysis-result
+          path: gemini_build_analysis.txt
+
       - name: Upload Build Artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -216,25 +215,21 @@ jobs:
           name: build-WebGL
           path: build/WebGL
 
-      # 9. GitHub Pages 배포 준비
       - name: Setup Pages
         if: success()
         uses: actions/configure-pages@v5
 
-      # 10. Pages용 Artifact 업로드
       - name: Upload Pages Artifact
         if: success()
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/WebGL/WebGL
 
-      # 11. GitHub Pages 배포
       - name: Deploy to GitHub Pages
         if: success()
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # 12. 성공 알림
       - name: Slack Notification (Success)
         if: success()
         uses: slackapi/slack-github-action@v2.1.1
@@ -263,7 +258,6 @@ jobs:
               ]
             }
 
-      # 13. 실패 알림 (Gemini 분석 결과 포함)
       - name: Slack Notification (Failure)
         if: failure()
         uses: slackapi/slack-github-action@v2.1.1
@@ -327,7 +321,6 @@ jobs:
         env:
           BUTLER_API_KEY: ${{ secrets.ITCH_IO_API }}
         run: |
-          # Butler 실행 및 출력 캡처
           butler push build/WebGL skkupsh/card-factory:html5 2>&1 | tee butler_output.log
           
           EXIT_CODE=${PIPESTATUS[0]}
@@ -338,7 +331,6 @@ jobs:
             exit $EXIT_CODE
           fi
 
-      # --- 배포 실패 시 분석 로직 (Node.js 방식) ---
       - name: Set up Node for Deploy Analysis
         if: failure()
         uses: actions/setup-node@v4
@@ -349,6 +341,7 @@ jobs:
         if: failure()
         run: npm install @google/generative-ai
 
+      # --- [수정됨] 배포 에러 분석 및 파일 저장 ---
       - name: Analyze Deploy Error with Gemini
         if: failure()
         id: analyze_deploy_error
@@ -369,27 +362,44 @@ jobs:
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const prompt = `
-            다음은 itch.io Butler 배포 실패 로그입니다. 
-            이 로그를 분석하여 한국어로 해결 방법을 제안해주세요.
-
-            **원인 및 해결방법:**
-
-            로그:
-            \`\`\`
-            ${logContent}
-            \`\`\`
+            다음은 itch.io Butler 배포 실패 로그입니다. 한국어로 해결법을 알려주세요.
+            로그: \`\`\`${logContent}\`\`\`
             `;
 
             try {
+              console.log("🚀 Requesting Gemini API (Deploy)...");
               const result = await model.generateContent(prompt);
               const response = await result.response;
               const text = response.text();
+              
+              // 1. 응답 검증
+              if (text && text.length > 0) {
+                console.log(`✅ Gemini Response Received (${text.length} chars)`);
+              } else {
+                console.warn("⚠️ Gemini Response is empty!");
+              }
+
+              // 2. 파일 저장
+              fs.writeFileSync("gemini_deploy_analysis.txt", text);
+              console.log("💾 Saved analysis to gemini_deploy_analysis.txt");
+
+              // 3. Slack용 JSON 처리
               const safeText = JSON.stringify(text).slice(1, -1);
               core.setOutput("analysis", safeText);
+
             } catch (error) {
-              console.error("Gemini API Error:", error);
-              core.setOutput("analysis", "⚠️ Gemini 분석 실패: " + error.message);
+              console.error("❌ Gemini API Error:", error);
+              fs.writeFileSync("gemini_deploy_analysis.txt", "Error:" + error.message);
+              core.setOutput("analysis", "⚠️ 분석 실패:" + error.message);
             }
+
+      # --- [추가됨] 배포 분석 결과 아티팩트 업로드 ---
+      - name: Upload Gemini Analysis Artifact (Deploy)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemini-deploy-analysis-result
+          path: gemini_deploy_analysis.txt
 
       - name: Slack Notification (Deploy Failure)
         if: failure()
