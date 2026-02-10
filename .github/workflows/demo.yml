@@ -28,38 +28,25 @@ jobs:
       - name: Check if build is needed
         id: check
         run: |
-          # Push 이벤트면 항상 빌드
-          if [ "${{ github.event_name }}" = "push" ]; then
+          # Push 또는 수동 실행이면 무조건 빌드
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
-            echo "last_commit_message=${{ github.event.head_commit.message }}" >> $GITHUB_OUTPUT
-            echo "✅ Push event - build triggered"
+            echo "last_commit_message=${{ github.event.head_commit.message || 'Manual build' }}" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # 수동 실행이면 항상 빌드
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "should_build=true" >> $GITHUB_OUTPUT
-            echo "last_commit_message=Manual build triggered" >> $GITHUB_OUTPUT
-            echo "✅ Manual trigger - build triggered"
-            exit 0
-          fi
-          
-          # 스케줄 실행인 경우 - main 브랜치 체크
+          # 스케줄 실행인 경우 변경사항 체크
           git fetch origin main
           git checkout main
-          
-          # 지난 24시간 이내 커밋이 있는지 확인
           COMMITS_LAST_24H=$(git log --since="24 hours ago" --oneline | wc -l)
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
           
           if [ $COMMITS_LAST_24H -gt 0 ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
             echo "last_commit_message=$LAST_COMMIT_MSG" >> $GITHUB_OUTPUT
-            echo "✅ Found $COMMITS_LAST_24H commits in last 24 hours - build triggered"
           else
             echo "should_build=false" >> $GITHUB_OUTPUT
             echo "last_commit_message=No changes" >> $GITHUB_OUTPUT
-            echo "ℹ️ No commits in last 24 hours - build skipped"
           fi
 
   build:
@@ -88,7 +75,7 @@ jobs:
           ref: ${{ github.event_name == 'schedule' && 'main' || github.ref }}
           fetch-depth: 0
 
-      # 2. 이전 빌드 성공 커밋 찾기
+      # 2. 이전 빌드 커밋 확인 (변경 사항 로그용)
       - name: Get Previous Successful Build Commit
         id: previous_commit
         run: |
@@ -96,26 +83,22 @@ jobs:
             STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               "https://api.github.com/repos/${{ github.repository }}/commits/${commit}/status" | \
               jq -r '.state')
-            
             if [ "$STATUS" = "success" ]; then
               echo "$commit"
               break
             fi
           done)
-          
           if [ -z "$PREVIOUS_COMMIT" ]; then
             PREVIOUS_COMMIT=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)
           fi
-          
           echo "previous_sha=$PREVIOUS_COMMIT" >> $GITHUB_OUTPUT
 
-      # 3. 커밋 내역 생성
+      # 3. 커밋 로그 생성
       - name: Generate Commit History
         id: commits
         run: |
           PREVIOUS_SHA="${{ steps.previous_commit.outputs.previous_sha }}"
           CURRENT_SHA="${{ github.sha }}"
-          
           COMMITS=$(git log --pretty=format:"• %s (%an)" ${PREVIOUS_SHA}..${CURRENT_SHA} | head -n 10)
           
           echo "commit_list<<EOF" >> $GITHUB_OUTPUT
@@ -148,98 +131,80 @@ jobs:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
 
-      # 6. 빌드 로그 저장 (실패 시)
+      # 6. 빌드 로그 파일 저장 (실패 시에만 수행)
       - name: Save Build Log
         if: failure()
-        id: save_log
         run: |
           LOG_FILE=$(find /home/runner/work -name "*.log" -type f | grep -i unity | head -1)
           if [ -n "$LOG_FILE" ]; then
-            # 에러는 주로 끝에 있으므로 마지막 500줄만 저장
-            tail -n 500 "$LOG_FILE" > build_error.log
-            echo "log_saved=true" >> $GITHUB_OUTPUT
+            # Gemini에게 보낼 로그가 너무 길지 않도록 마지막 20,000자만 추출
+            tail -c 20000 "$LOG_FILE" > build_error.log
           else
             echo "Build failed but log file not accessible" > build_error.log
-            echo "log_saved=false" >> $GITHUB_OUTPUT
           fi
 
-      # 7. Gemini API로 로그 분석 (수정됨 - 강화된 에러 처리)
+      # 7-1. Node.js 설정 (Gemini SDK 사용 위함)
+      - name: Set up Node for Analysis
+        if: failure()
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 7-2. Gemini 라이브러리 설치
+      - name: Install GoogleGenerativeAI
+        if: failure()
+        run: npm install @google/generative-ai
+
+      # 7-3. Gemini API로 로그 분석 (JavaScript 실행)
       - name: Analyze Build Error with Gemini
         if: failure()
         id: analyze_error
-        run: |
-          # 1. 로그 파일 확인
-          if [ -f "build_error.log" ]; then
-            LOG_CONTENT=$(cat build_error.log)
-          else
-            LOG_CONTENT="Log file not found."
-          fi
-          
-          # 2. JSON 페이로드 생성 (jq 사용)
-          JSON_PAYLOAD=$(jq -n \
-            --arg log "$LOG_CONTENT" \
-            '{
-              contents: [{
-                parts: [{
-                  text: ("다음은 Unity WebGL 빌드 실패 로그입니다. 이 로그를 분석하여 다음 형식으로 간결하게 답변해주세요:\n\n**원인:**\n(빌드 실패의 주요 원인을 1-2문장으로 설명)\n\n**해결방법:**\n1. (구체적인 해결 방법)\n2. (추가 해결 방법이 있다면)\n\n로그:\n```\n" + $log + "\n```")
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1024
-              }
-            }')
-          
-          # 3. API 호출 (v1 사용 - 안정 버전)
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
-            -H 'Content-Type: application/json' \
-            -d "$JSON_PAYLOAD")
-          
-          # 4. HTTP 본문과 상태 코드 분리
-          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
-          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
-          
-          # 5. 디버깅 정보 출력
-          echo "=== Gemini API Debug Info ==="
-          echo "HTTP Status: $HTTP_STATUS"
-          echo "Response Body (first 200 chars): $(echo "$HTTP_BODY" | head -c 200)"
-          echo "============================"
-          
-          # 6. 상태 코드별 처리
-          if [ "$HTTP_STATUS" = "200" ]; then
-            # JSON 파싱 시도 (에러 발생 시 대체 메시지)
-            ANALYSIS=$(echo "$HTTP_BODY" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null)
-            
-            # 파싱 결과가 null이거나 비어있는 경우
-            if [ -z "$ANALYSIS" ] || [ "$ANALYSIS" = "null" ]; then
-              echo "Error: Failed to parse Gemini response"
-              echo "Full response: $HTTP_BODY"
-              ANALYSIS="⚠️ Gemini 응답 파싱 실패. API는 정상 응답했으나 예상된 형식이 아닙니다."
-            fi
-          elif [ "$HTTP_STATUS" = "429" ]; then
-            ANALYSIS="⚠️ Gemini API 할당량(Quota) 초과\n무료 할당량을 모두 사용했습니다. 잠시 후 다시 시도하거나 API 키를 확인해주세요."
-          elif [ "$HTTP_STATUS" = "404" ]; then
-            ANALYSIS="⚠️ Gemini API 엔드포인트 오류 (404)\nAPI 키가 잘못되었거나 모델명이 올바르지 않습니다."
-          elif [ "$HTTP_STATUS" = "403" ]; then
-            ANALYSIS="⚠️ Gemini API 인증 실패 (403)\nAPI 키가 유효하지 않거나 권한이 없습니다."
-          elif [ "$HTTP_STATUS" = "400" ]; then
-            ERROR_MSG=$(echo "$HTTP_BODY" | jq -r '.error.message' 2>/dev/null || echo "Unknown error")
-            ANALYSIS="⚠️ Gemini API 요청 오류 (400)\n$ERROR_MSG"
-          else
-            # 기타 HTTP 에러
-            ERROR_MSG=$(echo "$HTTP_BODY" | jq -r '.error.message' 2>/dev/null || echo "$HTTP_BODY" | head -c 200)
-            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)\n$ERROR_MSG"
-          fi
-          
-          # 7. Github Output에 저장 (멀티라인 처리)
-          echo "analysis<<EOF" >> $GITHUB_OUTPUT
-          echo "$ANALYSIS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          # 최종 결과 확인
-          echo "Final Analysis Output:"
-          echo "$ANALYSIS"
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API }}
+        with:
+          script: |
+            const fs = require("fs");
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+            // 로그 파일 읽기
+            let logContent = "Log file not found.";
+            if (fs.existsSync("build_error.log")) {
+              logContent = fs.readFileSync("build_error.log", "utf8");
+            }
+
+            // Gemini 설정
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            const prompt = `
+            다음은 Unity WebGL 빌드 실패 로그의 마지막 부분입니다. 
+            이 로그를 분석하여 한국어로 다음 형식에 맞춰 간결하게 답변해주세요:
+
+            **원인:**
+            (빌드 실패의 주요 원인을 1-2문장으로 설명)
+
+            **해결방법:**
+            1. (구체적인 해결 방법)
+            2. (추가 해결 방법이 있다면)
+
+            로그:
+            \`\`\`
+            ${logContent}
+            \`\`\`
+            `;
+
+            try {
+              const result = await model.generateContent(prompt);
+              const response = await result.response;
+              const text = response.text();
+              console.log("Gemini Analysis Result:\n" + text);
+              // Slack 알림 단계에서 사용할 수 있도록 output 설정
+              core.setOutput("analysis", text);
+            } catch (error) {
+              console.error("Gemini API Error:", error);
+              core.setOutput("analysis", "⚠️ Gemini 분석 중 오류가 발생했습니다: " + error.message);
+            }
 
       # 8. 빌드 결과물 업로드 (성공 시)
       - name: Upload Build Artifact
@@ -267,7 +232,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # 12. 성공 알림 (GitHub Pages 링크 포함)
+      # 12. 성공 알림
       - name: Slack Notification (Success)
         if: success()
         uses: slackapi/slack-github-action@v2.1.1
@@ -282,12 +247,10 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "✅ *${{ github.repository }}* WebGL 빌드 완료\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '수동 빌드' || 'Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}\n🌐 <${{ steps.deployment.outputs.page_url }}|GitHub Pages에서 플레이하기>"
+                    "text": "✅ *${{ github.repository }}* WebGL 빌드 완료\n🚀 유형: ${{ github.event_name }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}\n🌐 <${{ steps.deployment.outputs.page_url }}|GitHub Pages 플레이>"
                   }
                 },
-                {
-                  "type": "divider"
-                },
+                { "type": "divider" },
                 {
                   "type": "section",
                   "text": {
@@ -298,7 +261,7 @@ jobs:
               ]
             }
 
-      # 13. 실패 알림 (Gemini 분석 포함)
+      # 13. 실패 알림 (Gemini 분석 결과 포함)
       - name: Slack Notification (Failure)
         if: failure()
         uses: slackapi/slack-github-action@v2.1.1
@@ -313,12 +276,10 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 *${{ github.repository }}* WebGL 빌드 실패\n🚀 빌드 유형: ${{ github.event_name == 'schedule' && '스케줄 빌드 (자동)' || github.event_name == 'workflow_dispatch' && '수동 빌드' || 'Push 빌드' }}\n🌿 브랜치: `${{ github.ref_name }}`\n📝 커밋: ${{ needs.check-changes.outputs.last_commit_message }}\n👤 작성자: ${{ github.actor }}"
+                    "text": "🔥 *${{ github.repository }}* WebGL 빌드 실패\n🚀 유형: ${{ github.event_name }}\n🌿 브랜치: `${{ github.ref_name }}`\n👤 작성자: ${{ github.actor }}"
                   }
                 },
-                {
-                  "type": "divider"
-                },
+                { "type": "divider" },
                 {
                   "type": "section",
                   "text": {
@@ -326,9 +287,7 @@ jobs:
                     "text": "🤖 *AI 분석 결과*\n${{ steps.analyze_error.outputs.analysis }}"
                   }
                 },
-                {
-                  "type": "divider"
-                },
+                { "type": "divider" },
                 {
                   "type": "section",
                   "text": {
@@ -346,109 +305,89 @@ jobs:
     if: needs.check-changes.outputs.should_build == 'true' && needs.build.result == 'success'
 
     steps:
-      # 1. 빌드 Artifact 다운로드
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: build-WebGL
           path: build/WebGL
 
-      # 2. Butler 직접 설치 및 업로드
       - name: Install and Setup Butler
         run: |
-          # Butler 다운로드 (대체 도메인 사용)
           curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
           unzip butler.zip
           chmod +x butler
           sudo mv butler /usr/local/bin/
-          
-          # Butler 버전 확인
           butler -V
 
       - name: Push to itch.io with Butler
+        id: butler_push
+        continue-on-error: true
         env:
           BUTLER_API_KEY: ${{ secrets.ITCH_IO_API }}
         run: |
-          butler push build/WebGL skkupsh/card-factory:html5
+          # Butler 실행 및 출력 캡처
+          butler push build/WebGL skkupsh/card-factory:html5 2>&1 | tee butler_output.log
+          
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "Butler exit code: $EXIT_CODE"
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            cp butler_output.log deploy_error.log
+            exit $EXIT_CODE
+          fi
 
-      # 3. 배포 실패 시 Gemini 분석
+      # --- 배포 실패 시 분석 로직 (Node.js 방식) ---
+      - name: Set up Node for Deploy Analysis
+        if: failure()
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install GoogleGenerativeAI
+        if: failure()
+        run: npm install @google/generative-ai
+
       - name: Analyze Deploy Error with Gemini
         if: failure()
         id: analyze_deploy_error
-        run: |
-          PROMPT="itch.io Butler 배포(Deploy)가 실패했습니다. 
-          Butler CLI를 직접 설치하여 사용하는 방식입니다.
-          
-          다음 형식으로 답변해주세요:
-          
-          **원인:**
-          (배포 실패의 주요 원인)
-          
-          **해결방법:**
-          1. (구체적인 해결 방법)
-          2. (추가 해결 방법)
-          3. (추가 해결 방법)"
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API }}
+        with:
+          script: |
+            const fs = require("fs");
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-          JSON_PAYLOAD=$(jq -n \
-            --arg prompt "$PROMPT" \
-            '{
-              contents: [{
-                parts: [{
-                  text: $prompt
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 800
-              }
-            }')
+            let logContent = "Deploy error log not found.";
+            if (fs.existsSync("deploy_error.log")) {
+              logContent = fs.readFileSync("deploy_error.log", "utf8");
+            }
 
-          # API 호출 (v1 엔드포인트 사용)
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${{ secrets.GEMINI_API }}" \
-            -H 'Content-Type: application/json' \
-            -d "$JSON_PAYLOAD")
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
-          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n 1)
+            const prompt = `
+            다음은 itch.io Butler 배포 실패 로그입니다. 
+            이 로그를 분석하여 한국어로 해결 방법을 제안해주세요.
 
-          # 디버깅 정보 출력
-          echo "=== Gemini API Debug Info ==="
-          echo "HTTP Status: $HTTP_STATUS"
-          echo "Response Body (first 200 chars): $(echo "$HTTP_BODY" | head -c 200)"
-          echo "============================"
+            **원인 및 해결방법:**
 
-          # 상태 코드별 처리
-          if [ "$HTTP_STATUS" = "200" ]; then
-            ANALYSIS=$(echo "$HTTP_BODY" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null)
-            
-            if [ -z "$ANALYSIS" ] || [ "$ANALYSIS" = "null" ]; then
-              echo "Error: Failed to parse Gemini response"
-              echo "Full response: $HTTP_BODY"
-              ANALYSIS="⚠️ Gemini 응답 파싱 실패"
-            fi
-          elif [ "$HTTP_STATUS" = "429" ]; then
-            ANALYSIS="⚠️ Gemini API 할당량 초과"
-          elif [ "$HTTP_STATUS" = "404" ]; then
-            ANALYSIS="⚠️ Gemini API 엔드포인트 오류 (404). API 키를 확인해주세요."
-          elif [ "$HTTP_STATUS" = "403" ]; then
-            ANALYSIS="⚠️ Gemini API 키가 유효하지 않습니다."
-          elif [ "$HTTP_STATUS" = "400" ]; then
-            ERROR_MSG=$(echo "$HTTP_BODY" | jq -r '.error.message' 2>/dev/null || echo "Unknown error")
-            ANALYSIS="⚠️ Gemini API 요청 오류 (400)\n$ERROR_MSG"
-          else
-            ERROR_MSG=$(echo "$HTTP_BODY" | jq -r '.error.message' 2>/dev/null || echo "$HTTP_BODY" | head -c 200)
-            ANALYSIS="⚠️ Gemini API 호출 실패 (HTTP $HTTP_STATUS)\n$ERROR_MSG"
-          fi
-          
-          echo "analysis<<EOF" >> $GITHUB_OUTPUT
-          echo "$ANALYSIS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          echo "Final Analysis Output:"
-          echo "$ANALYSIS"
+            로그:
+            \`\`\`
+            ${logContent}
+            \`\`\`
+            `;
 
-      # 4. 배포 실패 알림 (Gemini 분석 포함)
+            try {
+              const result = await model.generateContent(prompt);
+              const response = await result.response;
+              const text = response.text();
+              core.setOutput("analysis", text);
+            } catch (error) {
+              console.error("Gemini API Error:", error);
+              core.setOutput("analysis", "⚠️ Gemini 분석 실패: " + error.message);
+            }
+
       - name: Slack Notification (Deploy Failure)
         if: failure()
         uses: slackapi/slack-github-action@v2.1.1
@@ -463,12 +402,10 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🚀 *${{ github.repository }}* itch.io 배포 실패\nitch.io 업로드 중 오류가 발생했습니다."
+                    "text": "🚀 *${{ github.repository }}* itch.io 배포 실패"
                   }
                 },
-                {
-                  "type": "divider"
-                },
+                { "type": "divider" },
                 {
                   "type": "section",
                   "text": {
@@ -476,9 +413,7 @@ jobs:
                     "text": "🤖 *AI 분석 결과*\n${{ steps.analyze_deploy_error.outputs.analysis }}"
                   }
                 },
-                {
-                  "type": "divider"
-                },
+                { "type": "divider" },
                 {
                   "type": "section",
                   "text": {
@@ -489,7 +424,6 @@ jobs:
               ]
             }
 
-      # 5. 배포 성공 알림 (itch.io 링크 포함)
       - name: Slack Notification (Deploy Success)
         if: success()
         uses: slackapi/slack-github-action@v2.1.1
@@ -510,7 +444,6 @@ jobs:
               ]
             }
 
-      # 6. Artifact 정리
       - name: Cleanup Artifacts
         if: always()
         uses: geekyeggo/delete-artifact@v1
