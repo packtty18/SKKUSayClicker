@@ -174,7 +174,6 @@ jobs:
             }
 
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            // [모델명 교체] 2.5-flash-lite는 잘못된 이름입니다. 2.0-flash 사용.
             const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
             const codeBlock = "\`\`\`";
@@ -374,7 +373,6 @@ jobs:
             }
 
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            // [모델명 교체] 여기도 2.0-flash로 통일
             const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
             const codeBlock = "\`\`\`";
