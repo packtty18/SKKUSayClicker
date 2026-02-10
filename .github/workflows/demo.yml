@@ -111,26 +111,46 @@ jobs:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
 
+      # 6. 빌드 로그 저장 (가장 최근 로그 타겟팅 & C# 에러 추출 강화)
       - name: Save Build Log
         if: failure() || steps.unity_build.outcome == 'failure'
         id: save_log
         run: |
-          LOG_FILE=$(find /home/runner/work -name "*.log" -type f 2>/dev/null | grep -i unity | head -1)
+          echo "🔍 Searching for the most recent Unity log file..."
+          
+          # [수정 1] 가장 최근에 수정된 .log 파일 1개만 찾음 (ls -t: 시간순 정렬)
+          # xargs를 사용하여 공백이 포함된 경로도 안전하게 처리
+          LOG_FILE=$(find /home/runner/work -name "*.log" -type f -print0 | xargs -0 ls -1t | head -n 1)
           
           if [ -n "$LOG_FILE" ]; then
-            echo "Found log file: $LOG_FILE"
-            grep -iE "error|exception|fail|failed|fatal" "$LOG_FILE" > build_error.log || true
+            echo "✅ Found most recent log file: $LOG_FILE"
             
+            # [수정 2] grep 패턴 강화
+            # - ": error" : C# 컴파일 에러 (예: AccountManager.cs(26,29): error...)
+            # - "error CS" : C# 에러 코드
+            # - "Exception" : 런타임/에디터 예외
+            # - "Build Finished, Result: Failure" : 빌드 실패 요약
+            grep -E ": error|error CS|Exception|fatal|Build Finished, Result: Failure" "$LOG_FILE" > build_error.log || true
+            
+            # [수정 3] 에러 문맥 확보 (선택사항)
+            # 위 grep으로도 내용이 너무 적으면, 에러 주변 2줄씩 포함해서 다시 추출 시도 가능
+            # 현재는 깔끔함을 위해 위 명령어 유지
+            
+            # 3. 파일이 비어있는지 확인
             if [ ! -s build_error.log ]; then
-              echo "⚠️ No explicit error keywords found. Tailing last 100 lines..."
-              tail -n 100 "$LOG_FILE" > build_error.log
+              echo "⚠️ No explicit error lines found in the log. Capturing last 200 lines as fallback..."
+              tail -n 200 "$LOG_FILE" > build_error.log
+            else
+              echo "✅ Extracted specific error lines:"
+              cat build_error.log # 디버깅용 출력
             fi
+            
             echo "log_saved=true" >> $GITHUB_OUTPUT
+            
           else
-            echo "Build failed but log file not accessible" > build_error.log
+            echo "❌ Build failed but no log file found." > build_error.log
             echo "log_saved=false" >> $GITHUB_OUTPUT
           fi
-
       # --- [수정됨] 모델: gemini-2.5-flash-lite ---
       - name: Analyze Build Error with Gemini
         if: failure() || steps.unity_build.outcome == 'failure'
