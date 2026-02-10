@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   check-changes:
-    name: Check for Changes
+    name: Check for Changes  #커밋이 있었는지 체크함
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
@@ -147,7 +147,7 @@ jobs:
       - name: Set up Node for Analysis
         if: failure()
         uses: actions/setup-node@v4
-        with:
+        with: 
           node-version: '20'
 
       # 7-2. Gemini 라이브러리 설치
@@ -200,10 +200,12 @@ jobs:
               const text = response.text();
               console.log("Gemini Analysis Result:\n" + text);
               // Slack 알림 단계에서 사용할 수 있도록 output 설정
-              core.setOutput("analysis", text);
+
+              const safeText = JSON.stringify(text).slice(1, -1);
+              core.setOutput("analysis", safeText);
             } catch (error) {
               console.error("Gemini API Error:", error);
-              core.setOutput("analysis", "⚠️ Gemini 분석 중 오류가 발생했습니다: " + error.message);
+              core.setOutput("analysis", "⚠️ Gemini 분석 중 오류가 발생했습니다:" + error.message);
             }
 
       # 8. 빌드 결과물 업로드 (성공 시)
@@ -382,7 +384,8 @@ jobs:
               const result = await model.generateContent(prompt);
               const response = await result.response;
               const text = response.text();
-              core.setOutput("analysis", text);
+              const safeText = JSON.stringify(text).slice(1, -1);
+              core.setOutput("analysis", safeText);
             } catch (error) {
               console.error("Gemini API Error:", error);
               core.setOutput("analysis", "⚠️ Gemini 분석 실패: " + error.message);
