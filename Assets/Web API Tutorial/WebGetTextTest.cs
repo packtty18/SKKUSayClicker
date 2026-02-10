@@ -4,25 +4,17 @@ using UnityEngine.Networking;
 
 public class WebGetTextTest : MonoBehaviour
 {
-    void Start()
+    private async void Start()
     {
-        GetText().Forget();
+        string result = await GetWebText("https://www.google.com/search?q=url&oq=url&gs_lcrp=EgZjaHJvbWUyDwgAEEUYORiDARixAxiABDINCAEQABiDARixAxiABDINCAIQABiDARixAxiABDINCAMQABiDARixAxiABDIKCAQQABixAxiABDIGCAUQRRg8MgYIBhBFGDwyBggHEEUYPNIBBzk3NWowajeoAgCwAgA&sourceid=chrome&ie=UTF-8");
+        Debug.Log(result);
     }
 
     //1. 데이터 가져오기   : Get
-    private async UniTask GetText()
+    private async UniTask<string> GetWebText(string url)
     {
-        UnityWebRequest www = UnityWebRequest.Get("https://www.google.com/search?q=url&oq=url&gs_lcrp=EgZjaHJvbWUyDwgAEEUYORiDARixAxiABDINCAEQABiDARixAxiABDINCAIQABiDARixAxiABDINCAMQABiDARixAxiABDIKCAQQABixAxiABDIGCAUQRRg8MgYIBhBFGDwyBggHEEUYPNIBBzk3NWowajeoAgCwAgA&sourceid=chrome&ie=UTF-8");
-        await www.SendWebRequest();
-
-        if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            Debug.Log(www.downloadHandler.text);
-        }
+        var text = (await UnityWebRequest.Get(url).SendWebRequest()).downloadHandler.text;
+        return text;
     }
     //2. 데이터 보내기     : Post
     //3. 데이터 수정하기   : Put
