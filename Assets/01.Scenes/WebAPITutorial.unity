@@ -213,6 +213,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _image: {fileID: 1103941848}
   _text: {fileID: 0}
+  IMAGE_URL: https://placedog.net/500/500?random
 --- !u!1 &328437985
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,7 +417,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 799008852}
-  - component: {fileID: 799008851}
+  - component: {fileID: 799008853}
   m_Layer: 0
   m_Name: WebGet
   m_TagString: Untagged
@@ -424,18 +425,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &799008851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 799008850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e60bbea618e6fd34aa36fee29b9799a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &799008852
 Transform:
   m_ObjectHideFlags: 0
@@ -451,6 +440,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &799008853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799008850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b4e5d556d2498a40a06a6dccf49e482, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1103941846
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,7 +540,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1289299397
 RectTransform:
   m_ObjectHideFlags: 0
@@ -575,6 +576,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _image: {fileID: 1103941848}
   _text: {fileID: 1718667889}
+  IMAGE_URL: https://placedog.net/500/500?random
 --- !u!1 &1718667887
 GameObject:
   m_ObjectHideFlags: 0
