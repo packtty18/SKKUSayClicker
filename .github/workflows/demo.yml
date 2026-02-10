@@ -28,17 +28,13 @@ jobs:
       - name: Check if build is needed
         id: check
         run: |
-          # Push 또는 수동 실행이면 무조건 빌드
           if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
             echo "last_commit_message=${{ github.event.head_commit.message || 'Manual build' }}" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # 스케줄 실행인 경우 변경사항 체크
-          # 안전한 체크아웃을 위해 원격 main을 추적하도록 설정
           git checkout -B main origin/main
-          
           COMMITS_LAST_24H=$(git log --since="24 hours ago" --oneline | wc -l)
           LAST_COMMIT_MSG=$(git log -1 --pretty=format:"%s")
           
@@ -125,12 +121,28 @@ jobs:
           targetPlatform: WebGL
           buildProfile: "Assets/Settings/Build Profiles/Web-Mobile-Development.asset"
 
-      - name: Save Build Log
+      # [수정됨] 핵심 로직 변경: 단순 tail이 아니라 에러 키워드 필터링
+      - name: Save Build Log (Filtered Errors)
         if: failure()
         run: |
+          # 1. Unity 로그 파일 찾기
           LOG_FILE=$(find /home/runner/work -name "*.log" -type f | grep -i unity | head -1)
+          
           if [ -n "$LOG_FILE" ]; then
-            tail -c 20000 "$LOG_FILE" > build_error.log
+            echo "Found log file: $LOG_FILE"
+            
+            # 2. grep으로 'error', 'exception', 'fail' 등이 포함된 줄만 추출 (대소문자 무시)
+            #    맥락 파악을 위해 에러 줄 위아래 1줄씩 포함하고 싶으면 -C 1 옵션 사용 가능하나, 여기선 깔끔하게 에러 줄만 추출
+            grep -iE "error|exception|fail|failed|fatal" "$LOG_FILE" > build_error.log
+            
+            # 3. 만약 필터링된 파일이 비어있다면 (키워드가 없는 붕괴 등), 안전하게 마지막 100줄을 백업으로 가져옴
+            if [ ! -s build_error.log ]; then
+              echo "⚠️ No explicit error keywords found. Tailing last 100 lines..."
+              tail -n 100 "$LOG_FILE" > build_error.log
+            else
+              echo "✅ Extracted specific error lines."
+            fi
+            
           else
             echo "Build failed but log file not accessible" > build_error.log
           fi
@@ -162,14 +174,15 @@ jobs:
             }
 
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model =genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+            // [모델명 교체] 2.5-flash-lite는 잘못된 이름입니다. 2.0-flash 사용.
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-            // [수정] 에디터 문법 강조 오류 방지용 변수
             const codeBlock = "\`\`\`";
 
+            // 프롬프트 수정: 이미 필터링된 로그임을 명시
             const prompt = `
-            다음은 Unity WebGL 빌드 실패 로그의 마지막 부분입니다. 
-            한국어로 **원인**과 **해결방법**을 요약해 주세요.
+            다음은 Unity WebGL 빌드 실패 로그에서 **에러(Error/Exception)** 관련 라인만 추출한 것입니다.
+            한국어로 **원인**과 **해결방법**을 명확하게 알려주세요.
             로그:
             ${codeBlock}
             ${logContent}
@@ -184,7 +197,6 @@ jobs:
               
               if (text && text.length > 0) {
                 console.log(`✅ Gemini Response Received (${text.length} chars)`);
-                // [추가] 로그에 분석 결과 출력
                 console.log("================ GEMINI BUILD ANALYSIS ================");
                 console.log(text);
                 console.log("=======================================================");
@@ -226,7 +238,7 @@ jobs:
         if: success()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/WebGL # [수정됨] WebGL 중복 경로 제거
+          path: build/WebGL
 
       - name: Deploy to GitHub Pages
         if: success()
@@ -323,16 +335,15 @@ jobs:
         env:
           BUTLER_API_KEY: ${{ secrets.ITCH_IO_API }}
         run: |
-          # 2>&1로 에러 스트림도 캡처
           butler push build/WebGL skkupsh/card-factory:html5 2>&1 | tee butler_output.log
           
-          # PIPESTATUS로 butler의 실제 종료 코드 확인
           EXIT_CODE=${PIPESTATUS[0]}
           echo "Butler exit code: $EXIT_CODE"
           
           if [ $EXIT_CODE -ne 0 ]; then
+            # Butler 로그는 짧으므로 그냥 복사해도 되지만, 통일성을 위해 여기서도 간단히 필터 가능
+            # 하지만 Butler 에러는 보통 몇 줄 안되므로 전체 저장
             cp butler_output.log deploy_error.log
-            # 여기서 exit 1을 하면 step이 실패로 처리되어 아래 failure() 단계가 실행됨
             exit $EXIT_CODE
           fi
 
@@ -363,9 +374,9 @@ jobs:
             }
 
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+            // [모델명 교체] 여기도 2.0-flash로 통일
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-            // [수정] 에디터 문법 강조 오류 방지용 변수
             const codeBlock = "\`\`\`";
 
             const prompt = `
@@ -383,7 +394,6 @@ jobs:
               
               if (text && text.length > 0) {
                 console.log(`✅ Gemini Response Received (${text.length} chars)`);
-                // [추가] 로그에 분석 결과 출력
                 console.log("================ GEMINI DEPLOY ANALYSIS ================");
                 console.log(text);
                 console.log("========================================================");
