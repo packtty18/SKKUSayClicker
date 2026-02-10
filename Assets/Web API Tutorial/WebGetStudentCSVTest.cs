@@ -46,6 +46,12 @@ public class WebGetStudentCSVTest : MonoBehaviour
                 continue;
             }
 
+            if (!int.TryParse(columns[0], out int id))
+            {
+                Debug.LogWarning($"[CSV] id가 int형식이 아님: {line}");
+                continue;
+            }
+
             string name = columns[1];
             if (!int.TryParse(columns[2], out int age))
             {
@@ -53,7 +59,7 @@ public class WebGetStudentCSVTest : MonoBehaviour
                 continue;
             }
 
-            _students.Add(new Student(name, age));
+            _students.Add(new Student(id,name, age));
         }
 
         Debug.Log($"[CSV] Parsed {_students.Count} students");
@@ -63,7 +69,7 @@ public class WebGetStudentCSVTest : MonoBehaviour
     {
         foreach (Student student in _students)
         {
-            Debug.Log($"Name : {student.Name}, Age : {student.Age}");
+            Debug.Log($"ID : {student.ID}, Name : {student.Name}, Age : {student.Age}");
         }
     }
 
