@@ -1,6 +1,11 @@
+using CsvHelper;
+using CsvHelper.Configuration;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -18,51 +23,39 @@ public class WebGetStudentCSVTest : MonoBehaviour
 
     private async UniTask LoadStudents()
     {
-        string csv = await GetWebText(URL);
-        Debug.Log(csv);
+        string csvText = await GetWebText(URL);
 
-        ParseCSV(csv);
-        PrintList();
-    }
-
-    private void ParseCSV(string csv)
-    {
-        _students.Clear();
-
-        string[] lines = csv.Split('\n');
-        for (int i = 1; i < lines.Length; i++)
+        if (string.IsNullOrEmpty(csvText))
         {
-            string line = lines[i].Trim();
-            if (string.IsNullOrEmpty(line))
-            {
-                continue;
-            }
-
-            string[] columns = line.Split(',');
-
-            if (columns.Length < 3)
-            {
-                Debug.LogWarning($"[CSV] 올바르지 않는 양식 감지: {line}");
-                continue;
-            }
-
-            if (!int.TryParse(columns[0], out int id))
-            {
-                Debug.LogWarning($"[CSV] id가 int형식이 아님: {line}");
-                continue;
-            }
-
-            string name = columns[1];
-            if (!int.TryParse(columns[2], out int age))
-            {
-                Debug.LogWarning($"[CSV] age가 int형식이 아님: {line}");
-                continue;
-            }
-
-            _students.Add(new Student(id,name, age));
+            Debug.LogWarning("[WebGetStudentCSVTest] CSV is empty.");
+            return;
         }
 
-        Debug.Log($"[CSV] Parsed {_students.Count} students");
+        csvText = csvText.TrimStart('\uFEFF'); // BOM 제거
+
+        try
+        {
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                MemberTypes = MemberTypes.Fields, // ⭐ 핵심
+                MissingFieldFound = null,
+                HeaderValidated = null
+            };
+
+            using var reader = new StringReader(csvText);
+            using var csv = new CsvReader(reader, config);
+
+            _students.Clear();
+            _students.AddRange(csv.GetRecords<Student>());
+
+            Debug.Log($"[CSV] Parsed {_students.Count} students");
+            PrintList();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[CSV] Parse Error: {e}");
+        }
     }
 
     private void PrintList()
