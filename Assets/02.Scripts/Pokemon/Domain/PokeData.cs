@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 포켓몬의 기본 정보를 담는 데이터 클래스
-/// </summary>
+#region ======================= DOMAIN =======================
+
 [Serializable]
 public class PokemonData
 {
@@ -12,31 +11,46 @@ public class PokemonData
     [SerializeField] private string name;
     [SerializeField] private int height;
     [SerializeField] private int weight;
+    [SerializeField] private string description;
     [SerializeField] private int baseExperience;
-    [SerializeField] private List<PokemonType> types;   //타입은 여러개일수 있다. 1.electric
-    [SerializeField] private List<PokemonStat> stats;   //스텟도 여러개일수 있다.
+    [SerializeField] private List<PokemonType> types;
+    [SerializeField] private List<PokemonStat> stats;
     [SerializeField] private PokemonSprites sprites;
+    [SerializeField] private PokemonGifSprites gifSprites;
 
     public int Id => id;
     public string Name => name;
     public int Height => height;
     public int Weight => weight;
+    public string Description => description;
     public int BaseExperience => baseExperience;
     public IReadOnlyList<PokemonType> Types => types;
     public IReadOnlyList<PokemonStat> Stats => stats;
     public PokemonSprites Sprites => sprites;
+    public PokemonGifSprites GifSprites => gifSprites;
 
-    public PokemonData(int id, string name, int height, int weight, int baseExperience,
-        List<PokemonType> types, List<PokemonStat> stats, PokemonSprites sprites)
+    public PokemonData(
+        int id,
+        string name,
+        int height,
+        int weight,
+        string description,
+        int baseExperience,
+        List<PokemonType> types,
+        List<PokemonStat> stats,
+        PokemonSprites sprites,
+        PokemonGifSprites gifSprites)
     {
         this.id = id;
         this.name = name;
         this.height = height;
         this.weight = weight;
+        this.description = description ?? "No description available.";
         this.baseExperience = baseExperience;
         this.types = types ?? new List<PokemonType>();
         this.stats = stats ?? new List<PokemonStat>();
         this.sprites = sprites;
+        this.gifSprites = gifSprites;
     }
 }
 
@@ -79,26 +93,51 @@ public class PokemonStat
 public class PokemonSprites
 {
     [SerializeField] private string frontDefault;
-    [SerializeField] private string frontShiny;
     [SerializeField] private string backDefault;
-    [SerializeField] private string backShiny;
+    [SerializeField] private string frontFemale;
+    [SerializeField] private string backFemale;
 
     public string FrontDefault => frontDefault;
-    public string FrontShiny => frontShiny;
     public string BackDefault => backDefault;
-    public string BackShiny => backShiny;
+    public string FrontFemale => frontFemale;
+    public string BackFemale => backFemale;
 
-    public PokemonSprites(string frontDefault, string frontShiny, string backDefault, string backShiny)
+    public PokemonSprites(
+        string frontDefault,
+        string backDefault,
+        string frontFemale,
+        string backFemale)
     {
         this.frontDefault = frontDefault;
-        this.frontShiny = frontShiny;
         this.backDefault = backDefault;
-        this.backShiny = backShiny;
+        this.frontFemale = frontFemale;
+        this.backFemale = backFemale;
     }
 }
 
+[Serializable]
+public class PokemonGifSprites
+{
+    [SerializeField] private string frontDefaultGif;
+    [SerializeField] private string backDefaultGif;
 
-//api에 담기위한 dto
+    public string FrontDefaultGif => frontDefaultGif;
+    public string BackDefaultGif => backDefaultGif;
+
+    public PokemonGifSprites(
+        string frontDefaultGif,
+        string backDefaultGif)
+    {
+        this.frontDefaultGif = frontDefaultGif;
+        this.backDefaultGif = backDefaultGif;
+    }
+}
+
+#endregion
+
+
+#region ======================= API DTO =======================
+
 [Serializable]
 public class PokemonApiResponse
 {
@@ -109,7 +148,45 @@ public class PokemonApiResponse
     public int base_experience;
     public List<TypeSlot> types;
     public List<StatInfo> stats;
-    public SpriteUrls sprites;
+    public SpriteRoot sprites;
+    public SpeciesReference species;
+}
+
+[Serializable]
+public class SpeciesReference
+{
+    public string name;
+    public string url;
+}
+
+[Serializable]
+public class PokemonSpeciesResponse
+{
+    public int id;
+    public string name;
+    public List<FlavorTextEntry> flavor_text_entries;
+}
+
+[Serializable]
+public class FlavorTextEntry
+{
+    public string flavor_text;
+    public LanguageReference language;
+    public VersionReference version;
+}
+
+[Serializable]
+public class LanguageReference
+{
+    public string name;
+    public string url;
+}
+
+[Serializable]
+public class VersionReference
+{
+    public string name;
+    public string url;
 }
 
 [Serializable]
@@ -141,14 +218,36 @@ public class StatData
     public string url;
 }
 
+#region ===== Sprite DTO =====
+
 [Serializable]
-public class SpriteUrls
+public class SpriteRoot
 {
     public string front_default;
-    public string front_shiny;
     public string back_default;
-    public string back_shiny;
+    public string front_female;
+    public string back_female;
+    public OtherSprites other;
+    public Versions versions; 
 }
+
+[Serializable]
+public class OtherSprites
+{
+    public ShowdownSprites showdown;
+}
+
+[Serializable]
+public class ShowdownSprites
+{
+    public string front_default;
+    public string back_default;
+}
+
+#endregion
+
+
+#region ===== List Response =====
 
 [Serializable]
 public class PokemonListResponse
@@ -164,4 +263,34 @@ public class PokemonListItem
 {
     public string name;
     public string url;
+}
+
+#endregion
+
+#endregion
+
+
+[Serializable]
+public class Versions
+{
+    public GenerationV generation_v;
+}
+
+[Serializable]
+public class GenerationV
+{
+    public BlackWhite black_white;
+}
+
+[Serializable]
+public class BlackWhite
+{
+    public AnimatedSprites animated;
+}
+
+[Serializable]
+public class AnimatedSprites
+{
+    public string front_default;
+    public string back_default;
 }

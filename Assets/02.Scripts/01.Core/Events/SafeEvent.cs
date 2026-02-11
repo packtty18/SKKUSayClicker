@@ -62,3 +62,34 @@ public class SafeEvent<T>
         _event?.Invoke(value);
     }
 }
+
+[Serializable]
+public class SafeEvent<T,E>
+{
+    private event Action<T, E> _event;
+    [NonSerialized] private HashSet<Action<T, E>> _listeners;
+
+    public SafeEvent()
+    {
+        _listeners = new HashSet<Action<T, E>>();
+    }
+
+    public void Subscribe(Action<T, E> listener)
+    {
+        if (_listeners == null) _listeners = new HashSet<Action<T, E>>();
+        if (_listeners.Add(listener))
+            _event += listener;
+    }
+
+    public void Unsubscribe(Action<T, E> listener)
+    {
+        if (_listeners == null) return;
+        if (_listeners.Remove(listener))
+            _event -= listener;
+    }
+
+    public void Invoke(T value , E valueE)
+    {
+        _event?.Invoke(value, valueE);
+    }
+}

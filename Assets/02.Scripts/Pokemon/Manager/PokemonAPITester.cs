@@ -127,9 +127,9 @@ public class PokemonAPITester : MonoBehaviour
 
         Debug.Log($"\nSprites:");
         Debug.Log($"  - Front Default: {pokemonData.Sprites.FrontDefault}");
-        Debug.Log($"  - Front Shiny: {pokemonData.Sprites.FrontShiny}");
+        Debug.Log($"  - Front Female: {pokemonData.Sprites.FrontFemale}");
         Debug.Log($"  - Back Default: {pokemonData.Sprites.BackDefault}");
-        Debug.Log($"  - Back Shiny: {pokemonData.Sprites.BackShiny}");
+        Debug.Log($"  - Back Female: {pokemonData.Sprites.BackFemale}");
     }
 
     private void OnPokemonListReceived(PokemonListResponse listResponse)
