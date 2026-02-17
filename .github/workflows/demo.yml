@@ -3,9 +3,9 @@ name: Unity WebGL Build & Deploy
 on:
   push:
     branches: [ web_build ]
-  schedule:
-    - cron: "0 0 * * *" # 매일 UTC 0시 = 한국시간 오전 9시
-  workflow_dispatch:
+  #schedule:
+    #- cron: "0 0 * * *" # 매일 UTC 0시 = 한국시간 오전 9시
+  #workflow_dispatch:
 
 permissions:
   contents: read
